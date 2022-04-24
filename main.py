@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (
     QPlainTextEdit
 )
 from PyQt5.QtCore import QSize, Qt
+import keyboard
 
 class MainWindow(QMainWindow):
 
@@ -14,6 +15,7 @@ class MainWindow(QMainWindow):
 
         self.setMinimumSize(QSize(400, 240))
         self.setWindowTitle("Clipboard search")
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         self.text_editor = QPlainTextEdit(self)
         self.text_editor.insertPlainText('Waiting copy')
@@ -29,8 +31,11 @@ class MainWindow(QMainWindow):
             self.text_editor.setPlainText('')
             self.text_editor.insertPlainText(text)
 
-            self.setWindowFlags(Qt.WindowStaysOnTopHint)
-            self.showNormal()
+            if self.isMinimized():
+                keyboard.wait('alt')
+
+                self.setWindowFlags(Qt.WindowStaysOnTopHint)
+                self.showNormal()
 
 
 if __name__ == '__main__':
