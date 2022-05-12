@@ -1,7 +1,7 @@
 import sys
 from PyQt5 import QtWidgets, QtNetwork
 from PyQt5.QtWidgets import (
-    QApplication, 
+    QApplication,
     QMainWindow,
     QPlainTextEdit
 )
@@ -9,6 +9,7 @@ from PyQt5.QtCore import QSize, Qt, QUrl
 import keyboard
 
 from utils import handle_hujiang_html
+
 
 class MainWindow(QMainWindow):
 
@@ -22,7 +23,8 @@ class MainWindow(QMainWindow):
         self.text_editor = QPlainTextEdit(self)
         self.text_editor.insertPlainText('Waiting copy')
         self.text_editor.move(10, 10)
-        self.text_editor.resize(380,220)
+        self.text_editor.resize(380, 220)
+        # self.text_editor.setFocusPolicy(Qt.NoFocus)
 
         self.copy_text = ''
 
@@ -30,12 +32,11 @@ class MainWindow(QMainWindow):
 
     def read_clipboard(self):
         self.copy_text = QApplication.clipboard().text()
-        
+
         if self.text_editor.toPlainText() != self.copy_text:
 
             if self.isMinimized():
                 keyboard.wait('alt')
-
                 self.setWindowFlags(Qt.WindowStaysOnTopHint)
                 self.showNormal()
             else:
@@ -79,9 +80,9 @@ class MainWindow(QMainWindow):
 
             cb = QApplication.clipboard()
             cb.clear(mode=cb.Clipboard)
-            cb.setText(text, mode=cb.Clipboard)
-        else: 
-            self.text_editor.insertPlainText(resp.errorString())
+            cb.setText(text + '\n', mode=cb.Clipboard)
+        else:
+            print(resp.errorString())
 
 
 if __name__ == '__main__':
