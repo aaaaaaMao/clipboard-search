@@ -1,32 +1,49 @@
 import re
+from dataclasses import dataclass
+
 from bs4 import BeautifulSoup
 
 
-def handle_hujiang_html(html):
+def parse_hujiang_html(html):
     soup = BeautifulSoup(html, 'html.parser')
-    pane = soup.find(class_='word-details-pane-header')
-    if not pane:
-        return 'Not Found'
-    word_info = pane.find(class_='word-info').h2.get_text()
-    pronounces = pane.find(class_='pronounces').find_all('span')[0].get_text()
-    simple = pane.find(class_='simple')
+    panes = soup.find_all(class_='word-details-pane-header')
 
-    type_ = ''
-    translation = []
+    result = []
+    for pane in panes:
+        word = pane.find(class_='word-info').h2.get_text()
+        pronounces = pane.find(class_='pronounces').find_all('span')[
+            0].get_text()
+        simple = pane.find(class_='simple')
 
-    if simple.h2:
-        type_ = simple.h2.get_text()
+        word_type = ''
+        translation = []
 
-        for li in simple.ul.find_all('li'):
-            translation.append(li.get_text())
-        if len(translation) == 1:
-            tran_ = translation[0].replace('；', '；\n')
-            translation = [re.sub(r'\d+\.\s*', '', tran_)]
+        if simple.h2:
+            word_type = simple.h2.get_text()
 
-    pronounces = re.sub(r'\[|\]', '', pronounces)
-    return '\n'.join([
-        word_info + f'({pronounces})',
-        type_,
-        '---',
-        '\n'.join(translation)
-    ])
+            for li in simple.ul.find_all('li'):
+                translation.append(li.get_text())
+            if len(translation) == 1:
+                # tran_ = translation[0].replace('；', '；\n')
+                translation = [re.sub(r'\d+\.\s*', '', translation[0])]
+
+        pronounces = re.sub(r'\[|\]', '', pronounces)
+        result.append(JPWord(word, pronounces, word_type, translation))
+
+    return result
+
+
+@dataclass
+class JPWord:
+    word: str
+    pronounces: str
+    word_type: str
+    translation: str
+
+    def __str__(self) -> str:
+        return '\n'.join([
+            self.word + f'({self.pronounces})',
+            self.word_type,
+            '---',
+            '\n'.join(self.translation)
+        ])

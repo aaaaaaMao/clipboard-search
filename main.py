@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QEvent
 import keyboard
 
-from utils import handle_hujiang_html
+from utils import parse_hujiang_html
 
 
 class MainWindow(QMainWindow):
@@ -76,8 +76,12 @@ class MainWindow(QMainWindow):
 
         if err == QtNetwork.QNetworkReply.NoError:
             bytes_string = resp.readAll()
-            text = handle_hujiang_html(str(bytes_string, 'utf-8'))
-            self.write_clipboard(text)
+            result = parse_hujiang_html(str(bytes_string, 'utf-8'))
+            if len(result) > 0:
+                text = str(result[0])
+                self.write_clipboard(text)
+            else:
+                self.write_clipboard('Not Found.')
         else:
             print(resp.errorString())
 
@@ -96,12 +100,13 @@ class MainWindow(QMainWindow):
 
 class Worker(QObject):
     search = pyqtSignal()
-    show_window =pyqtSignal()
+    show_window = pyqtSignal()
 
     def run(self):
         keyboard.add_hotkey('ctrl+q', lambda: self.search.emit())
         keyboard.add_hotkey('alt', lambda: self.show_window.emit())
         keyboard.wait()
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
