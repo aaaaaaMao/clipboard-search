@@ -1,14 +1,18 @@
 import sys
+from turtle import width
 from PyQt5 import QtWidgets, QtNetwork
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
-    QPlainTextEdit
+    QWidget,
+    QVBoxLayout,
+    QListWidget,
+    QMessageBox
 )
 from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QEvent
 import keyboard
 
-from utils import handle_hujiang_html
+from utils import parse_hujiang_html
 
 
 class MainWindow(QMainWindow):
@@ -16,15 +20,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
 
-        self.setMinimumSize(QSize(400, 240))
-        self.setWindowTitle("Clipboard search")
-        self.setWindowFlags(Qt.WindowStaysOnTopHint)
-
-        self.text_editor = QPlainTextEdit(self)
-        self.text_editor.insertPlainText('Waiting copy')
-        self.text_editor.move(10, 10)
-        self.text_editor.resize(380, 220)
-        self.text_editor.setFocusPolicy(Qt.NoFocus)
+        self.init_ui()
 
         self.thread = QThread()
         self.worker = Worker()
@@ -37,6 +33,23 @@ class MainWindow(QMainWindow):
         self.thread.start()
 
         self.copy_text = ''
+
+    def init_ui(self):
+        self.setMinimumSize(QSize(400, 240))
+        self.setWindowTitle("Clipboard search")
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+
+        vbox = QVBoxLayout()
+        self.list_widget = QListWidget()
+        self.list_widget.addItem('Waiting copy')
+        self.list_widget.itemDoubleClicked.connect(self.on_list_item_clicked)
+
+        vbox.addWidget(self.list_widget)
+        main_widget = QWidget()
+        main_widget.setLayout(vbox)
+        self.setCentralWidget(main_widget)
+
+        self.show()
 
     def search(self):
         self.copy_text = QApplication.clipboard().text()
@@ -76,8 +89,16 @@ class MainWindow(QMainWindow):
 
         if err == QtNetwork.QNetworkReply.NoError:
             bytes_string = resp.readAll()
-            text = handle_hujiang_html(str(bytes_string, 'utf-8'))
-            self.write_clipboard(text)
+            result = parse_hujiang_html(str(bytes_string, 'utf-8'))
+
+            self.list_widget.clear()
+            if len(result) > 0:
+                for word in result:
+                    self.list_widget.addItem(str(word))
+
+                self.copy_to_clipboard(str(result[0]))
+            else:
+                self.list_widget.addItem('Not Found.')
         else:
             print(resp.errorString())
 
@@ -86,22 +107,25 @@ class MainWindow(QMainWindow):
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
             self.showNormal()
 
-    def write_clipboard(self, resp_txt):
-        self.text_editor.setPlainText('')
-        self.text_editor.insertPlainText(resp_txt)
+    def copy_to_clipboard(self, text):
         cb = QApplication.clipboard()
         cb.clear(mode=cb.Clipboard)
-        cb.setText(resp_txt + '\n', mode=cb.Clipboard)
+        cb.setText(text + '\n', mode=cb.Clipboard)
+
+    def on_list_item_clicked(self, item):
+        self.copy_to_clipboard(item.text())
+        QMessageBox.information(self, 'Info', 'Copied!')
 
 
 class Worker(QObject):
     search = pyqtSignal()
-    show_window =pyqtSignal()
+    show_window = pyqtSignal()
 
     def run(self):
         keyboard.add_hotkey('ctrl+q', lambda: self.search.emit())
         keyboard.add_hotkey('alt', lambda: self.show_window.emit())
         keyboard.wait()
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
