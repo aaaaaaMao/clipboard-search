@@ -41,8 +41,11 @@ class JPWord:
     translation: str
 
     def __str__(self) -> str:
+        word = self.word
+        if self.pronounces != word:
+            word += f'({self.pronounces})'
         return '\n'.join([
-            self.word + f'({self.pronounces})',
+            word,
             self.word_type,
             '---',
             '\n'.join(self.translation)
