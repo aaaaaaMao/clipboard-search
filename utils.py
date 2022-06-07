@@ -11,24 +11,34 @@ def parse_hujiang_html(html):
     result = []
     for pane in panes:
         word = pane.find(class_='word-info').h2.get_text()
-        pronounces = pane.find(class_='pronounces').find_all('span')[
-            0].get_text()
-        simple = pane.find(class_='simple')
+        pronounces_div = pane.find(class_='pronounces')
+        pronounces = pronounces_div.find_all('span')[0].get_text()
+        simple_div = pane.find(class_='simple')
 
         word_type = ''
         translation = []
 
-        if simple.h2:
-            word_type = simple.h2.get_text()
+        word_type_h2 = simple_div.find_all('h2')
+        translation_ul = simple_div.find_all('ul')
 
-            for li in simple.ul.find_all('li'):
-                translation.append(li.get_text())
-            if len(translation) == 1:
-                # tran_ = translation[0].replace('；', '；\n')
-                translation = [re.sub(r'\d+\.\s*', '', translation[0])]
+        if word_type_h2 and len(word_type_h2):
+            for i in range(len(word_type_h2)):
+                word_type = ''
+                translation = []
 
-        pronounces = re.sub(r'\[|\]', '', pronounces)
-        result.append(JPWord(word, pronounces, word_type, translation))
+                word_type = word_type_h2[i].get_text()
+
+                for li in translation_ul[i].find_all('li'):
+                    translation.append(li.get_text())
+                if len(translation) == 1:
+                    # tran_ = translation[0].replace('；', '；\n')
+                    translation = [re.sub(r'\d+\.\s*', '', translation[0])]
+
+                pronounces = re.sub(r'\[|\]', '', pronounces)
+                result.append(JPWord(word, pronounces, word_type, translation))
+        else:
+            pronounces = re.sub(r'\[|\]', '', pronounces)
+            result.append(JPWord(word, pronounces, word_type, translation))
 
     return result
 
