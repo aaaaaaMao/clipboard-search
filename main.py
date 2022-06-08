@@ -1,15 +1,19 @@
 import sys
-from turtle import width
+
 from PyQt5 import QtWidgets, QtNetwork
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QListWidget,
-    QMessageBox
+    QListWidgetItem,
+    QMessageBox,
+    QLabel,
+    QCheckBox,
 )
-from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QEvent
+from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal
 import keyboard
 
 from utils import parse_hujiang_html
@@ -94,7 +98,20 @@ class MainWindow(QMainWindow):
             self.list_widget.clear()
             if len(result) > 0:
                 for word in result:
-                    self.list_widget.addItem(str(word))
+                    item = QListWidgetItem()
+                    widget = QWidget()
+                    text = QLabel(str(word))
+                    check = QCheckBox()
+                    layout = QHBoxLayout()
+                    layout.addWidget(check)
+                    layout.addWidget(text)
+                    
+                    layout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetFixedSize)
+                    widget.setLayout(layout)
+                    item.setSizeHint(widget.sizeHint())
+
+                    self.list_widget.addItem(item)
+                    self.list_widget.setItemWidget(item, widget)
 
                 self.copy_to_clipboard(str(result[0]))
             else:
@@ -112,8 +129,10 @@ class MainWindow(QMainWindow):
         cb.clear(mode=cb.Clipboard)
         cb.setText(text + '\n', mode=cb.Clipboard)
 
-    def on_list_item_clicked(self, item):
-        self.copy_to_clipboard(item.text())
+    def on_list_item_clicked(self, item: QListWidgetItem):
+        widget = self.list_widget.itemWidget(item)
+        lebel = widget.findChild(QLabel)
+        self.copy_to_clipboard(lebel.text())
         QMessageBox.information(self, 'Info', 'Copied!')
 
 
