@@ -102,6 +102,9 @@ class MainWindow(QMainWindow):
                     widget = QWidget()
                     text = QLabel(str(word))
                     check = QCheckBox()
+                    check.stateChanged.connect(
+                        lambda state: self.on_box_checked(state, word)
+                    )
                     layout = QHBoxLayout()
                     layout.addWidget(check)
                     layout.addWidget(text)
@@ -134,6 +137,12 @@ class MainWindow(QMainWindow):
         lebel = widget.findChild(QLabel)
         self.copy_to_clipboard(lebel.text())
         QMessageBox.information(self, 'Info', 'Copied!')
+
+    def on_box_checked(self, state, word):
+        if state == Qt.Checked:
+            print('Checked: \n' + str(word))
+        else:
+            print('Canceled')
 
 
 class Worker(QObject):
