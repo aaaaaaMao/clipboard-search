@@ -1,4 +1,5 @@
 import sys
+import logging
 
 from PyQt5 import QtWidgets, QtNetwork
 from PyQt5.QtWidgets import (
@@ -18,6 +19,14 @@ import keyboard
 
 from utils import parse_hujiang_html
 
+
+logging.basicConfig(
+    format='%(levelname)s - %(asctime)s - %(message)s', 
+    filename='app.log', 
+    filemode='a',
+    encoding='utf8',
+    level=logging.INFO
+)
 
 class MainWindow(QMainWindow):
 
@@ -58,6 +67,7 @@ class MainWindow(QMainWindow):
     def search(self):
         self.copy_text = QApplication.clipboard().text()
         if self.copy_text:
+            logging.info(f'Search: {self.copy_text}')
             self.show_window()
             self.search_from_hujiang(self.copy_text)
 
@@ -120,7 +130,7 @@ class MainWindow(QMainWindow):
             else:
                 self.list_widget.addItem('Not Found.')
         else:
-            print(resp.errorString())
+            logging.error(resp.errorString())
 
     def show_window(self):
         if self.isMinimized() and self.copy_text:
@@ -140,9 +150,9 @@ class MainWindow(QMainWindow):
 
     def on_box_checked(self, state, word):
         if state == Qt.Checked:
-            print('Checked: \n' + str(word))
+            logging.info('Check: ' + str(word).replace('\n', ''))
         else:
-            print('Canceled')
+            logging.info('Cancel: ')
 
 
 class Worker(QObject):
