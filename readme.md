@@ -36,3 +36,8 @@ show window
 pip install -r requirements.txt
 ./build.ps1
 ```
+
+---
+
+- Ref:
+  - System tray icon: <a href="https://www.flaticon.com/free-icons/battery" title="battery icons">Battery icons created by Freepik - Flaticon</a>

@@ -1,7 +1,7 @@
 import sys
 import logging
 
-from PyQt5 import QtWidgets, QtNetwork
+from PyQt5 import QtWidgets, QtNetwork, QtGui
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -13,8 +13,12 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QLabel,
     QCheckBox,
+    QMenu,
+    QAction,
+    QSystemTrayIcon,
 )
-from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal
+from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QCoreApplication
+from PyQt5.QtGui import QIcon
 import keyboard
 
 from utils import parse_hujiang_html
@@ -45,12 +49,19 @@ class MainWindow(QMainWindow):
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
 
+        self.quit_action.triggered.connect(self.quit_app)
+        self.tray_icon.activated.connect(self.on_tray_icon_activated)
+
         self.copy_text = ''
 
     def init_ui(self):
+
+        self.main_icon = QIcon('./images/battery.png')
+
         self.setMinimumSize(QSize(400, 240))
         self.setWindowTitle("Clipboard search")
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.setWindowIcon(self.main_icon)
 
         vbox = QVBoxLayout()
         self.list_widget = QListWidget()
@@ -61,6 +72,16 @@ class MainWindow(QMainWindow):
         main_widget = QWidget()
         main_widget.setLayout(vbox)
         self.setCentralWidget(main_widget)
+
+        self.quit_action = QAction('Quit')
+        # self.quit_action.setIcon(QIcon.fromTheme('application-exit'))
+        
+        self.tray_icon_memu = QMenu()
+        self.tray_icon_memu.addAction(self.quit_action)
+        self.tray_icon = QSystemTrayIcon()
+        self.tray_icon.setIcon(self.main_icon)
+        self.tray_icon.setContextMenu(self.tray_icon_memu)
+        self.tray_icon.show()
 
         self.show()
 
@@ -154,6 +175,14 @@ class MainWindow(QMainWindow):
         else:
             logging.info('Cancel: ')
 
+    def quit_app(self):
+        QCoreApplication.quit()
+
+    def on_tray_icon_activated(self, reason):
+        if reason == QSystemTrayIcon.ActivationReason.Trigger:
+            self.setWindowFlags(Qt.WindowStaysOnTopHint)
+            self.showNormal()
+
 
 class Worker(QObject):
     search = pyqtSignal()
@@ -167,6 +196,7 @@ class Worker(QObject):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
     mainWin = MainWindow()
     mainWin.show()
     sys.exit(app.exec_())
