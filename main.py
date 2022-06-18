@@ -1,7 +1,7 @@
 import sys
 import logging
 
-from PyQt5 import QtWidgets, QtNetwork, QtGui
+from PyQt5 import QtWidgets, QtNetwork
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -25,12 +25,13 @@ from utils import parse_hujiang_html
 
 
 logging.basicConfig(
-    format='%(levelname)s - %(asctime)s - %(message)s', 
-    filename='app.log', 
+    format='%(levelname)s - %(asctime)s - %(message)s',
+    filename='app.log',
     filemode='a',
     encoding='utf8',
     level=logging.INFO
 )
+
 
 class MainWindow(QMainWindow):
 
@@ -75,7 +76,7 @@ class MainWindow(QMainWindow):
 
         self.quit_action = QAction('Quit')
         # self.quit_action.setIcon(QIcon.fromTheme('application-exit'))
-        
+
         self.tray_icon_memu = QMenu()
         self.tray_icon_memu.addAction(self.quit_action)
         self.tray_icon = QSystemTrayIcon()
@@ -139,8 +140,10 @@ class MainWindow(QMainWindow):
                     layout = QHBoxLayout()
                     layout.addWidget(check)
                     layout.addWidget(text)
-                    
-                    layout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetFixedSize)
+
+                    layout.setSizeConstraint(
+                        QtWidgets.QLayout.SizeConstraint.SetFixedSize
+                    )
                     widget.setLayout(layout)
                     item.setSizeHint(widget.sizeHint())
 
@@ -154,7 +157,7 @@ class MainWindow(QMainWindow):
             logging.error(resp.errorString())
 
     def show_window(self):
-        if self.isMinimized() and self.copy_text:
+        if (self.isMinimized() or not self.isVisible()) and self.copy_text:
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
             self.showNormal()
 

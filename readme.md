@@ -2,6 +2,10 @@ Read text from clipboard and search it.
 
 Search Japanese word from [hujiang](https://dict.hjenglish.com/jp/jc/)
 
+```
+python >= 3.10.4
+```
+
 ### Usage:
 
 - CTRL+C  
@@ -40,4 +44,4 @@ pip install -r requirements.txt
 ---
 
 - Ref:
-  - System tray icon: <a href="https://www.flaticon.com/free-icons/battery" title="battery icons">Battery icons created by Freepik - Flaticon</a>
+- System tray icon: <a href="https://www.flaticon.com/free-icons/battery" title="battery icons">Battery icons created by Freepik - Flaticon</a>
