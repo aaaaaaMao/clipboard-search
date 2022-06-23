@@ -145,7 +145,9 @@ class MainWindow(QMainWindow):
                         QtWidgets.QLayout.SizeConstraint.SetFixedSize
                     )
                     widget.setLayout(layout)
-                    item.setSizeHint(widget.sizeHint())
+                    size = widget.sizeHint()
+                    size.setHeight(size.height() + 50)
+                    item.setSizeHint(size)
 
                     self.list_widget.addItem(item)
                     self.list_widget.setItemWidget(item, widget)
