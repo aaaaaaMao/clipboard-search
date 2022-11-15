@@ -22,6 +22,7 @@ from PyQt5.QtGui import QIcon
 import keyboard
 
 from utils import parse_hujiang_html
+from mouse_monitor import MouseMonitor
 
 
 logging.basicConfig(
@@ -194,7 +195,8 @@ class Worker(QObject):
     show_window = pyqtSignal()
 
     def run(self):
-        keyboard.add_hotkey('ctrl+q', lambda: self.search.emit())
+        # keyboard.add_hotkey('ctrl+q', lambda: self.search.emit())
+        mouse_monitor = MouseMonitor(signal=self.search)
         keyboard.add_hotkey('alt', lambda: self.show_window.emit())
         keyboard.wait()
 
