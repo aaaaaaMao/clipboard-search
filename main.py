@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
     QSystemTrayIcon,
 )
 from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QCoreApplication
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QMovie, QCursor
 import keyboard
 
 from utils import parse_hujiang_html
@@ -34,18 +34,64 @@ logging.basicConfig(
 )
 
 
+class IconWindow(QWidget):
+
+    search_signal = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+
+    def init_ui(self):
+        # self.setWindowTitle()
+        self.setGeometry(100, 100, 100, 100)
+
+        label = QLabel(self)
+        self.gif = QMovie('./images/think.gif')
+        pixmap = self.gif.currentPixmap()
+        self.gif.frameChanged.connect(self.onNextFrame)
+
+        label.setMovie(self.gif)
+        self.gif.start()
+        self.resize(pixmap.width(), pixmap.height())
+        self.setMask(pixmap.mask())
+
+        # 设置窗体无边框
+        self.setWindowFlags(Qt.FramelessWindowHint)
+
+        # 设置窗口置顶
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+
+        # 设置背景透明
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+    def onNextFrame(self):
+        pixmap = self.gif.currentPixmap()
+        # self.setPixmap(pixmap)
+        self.setMask(pixmap.mask())
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.search_signal.emit()
+
+
 class MainWindow(QMainWindow):
 
     def __init__(self):
         QMainWindow.__init__(self)
 
+        self.pos_x = 10
+        self.pos_y = 10
+
+        self.icon_window = IconWindow()
+        self.icon_window.search_signal.connect(self.search)
         self.init_ui()
 
         self.thread = QThread()
         self.worker = Worker()
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
-        self.worker.search.connect(self.search)
+        self.worker.search.connect(self.show_icon_window)
         self.worker.show_window.connect(self.show_window)
 
         self.thread.finished.connect(self.thread.deleteLater)
@@ -85,7 +131,8 @@ class MainWindow(QMainWindow):
         self.tray_icon.setContextMenu(self.tray_icon_memu)
         self.tray_icon.show()
 
-        self.show()
+        # self.show()
+        # self.icon_window.show()
 
     def search(self):
         self.copy_text = QApplication.clipboard().text()
@@ -161,8 +208,22 @@ class MainWindow(QMainWindow):
 
     def show_window(self):
         if (self.isMinimized() or not self.isVisible()) and self.copy_text:
+            self.move(self.pos_x, self.pos_y)
+
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
+            if self.icon_window.isVisible():
+                self.icon_window.hide()
             self.showNormal()
+
+    def show_icon_window(self):
+        pos = QCursor().pos()
+        self.pos_x = pos.x() + 10
+        self.pos_y = pos.y() - 100
+
+        self.icon_window.move(self.pos_x, self.pos_y)
+        if self.isVisible():
+            self.hide()
+        self.icon_window.show()
 
     def copy_to_clipboard(self, text):
         cb = QApplication.clipboard()
@@ -205,5 +266,5 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     mainWin = MainWindow()
-    mainWin.show()
+    # mainWin.show()
     sys.exit(app.exec_())
