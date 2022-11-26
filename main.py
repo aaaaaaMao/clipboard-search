@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
     QSystemTrayIcon,
 )
 from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QCoreApplication
-from PyQt5.QtGui import QIcon, QMovie, QCursor
+from PyQt5.QtGui import QIcon, QCursor, QPixmap
 import keyboard
 
 from utils import parse_hujiang_html
@@ -44,17 +44,19 @@ class IconWindow(QWidget):
 
     def init_ui(self):
         # self.setWindowTitle()
+        self.setWindowTitle("Clipboard search")
         self.setGeometry(100, 100, 100, 100)
 
+        pix = QPixmap('./images/battery.png').scaled(
+            45,
+            45,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
         label = QLabel(self)
-        self.gif = QMovie('./images/think.gif')
-        pixmap = self.gif.currentPixmap()
-        self.gif.frameChanged.connect(self.onNextFrame)
-
-        label.setMovie(self.gif)
-        self.gif.start()
-        self.resize(pixmap.width(), pixmap.height())
-        self.setMask(pixmap.mask())
+        label.setPixmap(pix)
+        self.resize(pix.width(), pix.height())
+        self.setMask(pix.mask())
 
         # 设置窗体无边框
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -64,11 +66,6 @@ class IconWindow(QWidget):
 
         # 设置背景透明
         self.setAttribute(Qt.WA_TranslucentBackground)
-
-    def onNextFrame(self):
-        pixmap = self.gif.currentPixmap()
-        # self.setPixmap(pixmap)
-        self.setMask(pixmap.mask())
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -212,7 +209,7 @@ class MainWindow(QMainWindow):
 
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
             if self.icon_window.isVisible():
-                self.icon_window.hide()
+                self.icon_window.close()
             self.showNormal()
 
     def show_icon_window(self):
