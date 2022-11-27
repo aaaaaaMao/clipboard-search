@@ -43,8 +43,7 @@ class IconWindow(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        # self.setWindowTitle()
-        self.setWindowTitle("Clipboard search")
+
         self.setGeometry(100, 100, 100, 100)
 
         pix = QPixmap('./images/battery.png').scaled(
@@ -58,11 +57,7 @@ class IconWindow(QWidget):
         self.resize(pix.width(), pix.height())
         self.setMask(pix.mask())
 
-        # 设置窗体无边框
-        self.setWindowFlags(Qt.FramelessWindowHint)
-
-        # 设置窗口置顶
-        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.ToolTip)
 
         # 设置背景透明
         self.setAttribute(Qt.WA_TranslucentBackground)
@@ -214,8 +209,8 @@ class MainWindow(QMainWindow):
 
     def show_icon_window(self):
         pos = QCursor().pos()
-        self.pos_x = pos.x() + 10
-        self.pos_y = pos.y() - 100
+        self.pos_x = pos.x() + 20
+        self.pos_y = pos.y() - 20
 
         self.icon_window.move(self.pos_x, self.pos_y)
         if self.isVisible():
