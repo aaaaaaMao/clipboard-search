@@ -94,6 +94,8 @@ class MainWindow(QMainWindow):
 
         self.copy_text = ''
 
+        self.in_main_window = False
+
     def init_ui(self):
 
         self.main_icon = QIcon('./images/battery.png')
@@ -208,6 +210,9 @@ class MainWindow(QMainWindow):
             self.showNormal()
 
     def show_icon_window(self):
+        if self.in_main_window:
+            return
+
         pos = QCursor().pos()
         self.pos_x = pos.x() + 20
         self.pos_y = pos.y() - 20
@@ -226,7 +231,7 @@ class MainWindow(QMainWindow):
         widget = self.list_widget.itemWidget(item)
         lebel = widget.findChild(QLabel)
         self.copy_to_clipboard(lebel.text())
-        QMessageBox.information(self, 'Info', 'Copied!')
+        # QMessageBox.information(self, 'Info', 'Copied!')
 
     def on_box_checked(self, state, word):
         if state == Qt.Checked:
@@ -241,6 +246,12 @@ class MainWindow(QMainWindow):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
             self.showNormal()
+
+    def enterEvent(self, event):
+        self.in_main_window = True
+
+    def leaveEvent(self, event):
+        self.in_main_window = False
 
 
 class Worker(QObject):

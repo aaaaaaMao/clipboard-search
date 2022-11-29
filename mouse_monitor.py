@@ -106,8 +106,8 @@ class MouseMonitor:
             wc.OpenClipboard()
             content = wc.GetClipboardData(win32con.CF_UNICODETEXT)
             wc.CloseClipboard()
-        except TypeError:
-            self.log('Clipboard Content is TypeError.')
+        except Exception as e:
+            self.log('Clipboard Content is TypeError.', e)
 
         self._content = content
         return content
