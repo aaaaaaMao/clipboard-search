@@ -20,15 +20,12 @@ def save_word(word, source, content):
 
 
 def list_words(word):
-    sql = f'SELECT * FROM words WHERE word={word}'
+    sql = f'SELECT * FROM words WHERE word="{word}"'
     cur.execute(sql)
     return cur.fetchall()
 
 
 def is_favorite(word):
-    try:
-        sql = f'SELECT * FROM words WHERE word={word}'
-        cur.execute(sql)
-        return cur.fetchall()
-    except Exception:
-        return None
+    sql = f'SELECT * FROM words WHERE word="{word}"'
+    cur.execute(sql)
+    return cur.fetchall()

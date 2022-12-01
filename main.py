@@ -179,7 +179,7 @@ class MainWindow(QMainWindow):
                     text = QLabel(str(word))
                     check = QCheckBox()
                     if is_favorite(word.word):
-                        check.setChecked()
+                        check.setChecked(True)
                     check.stateChanged.connect(
                         lambda state: self.on_box_checked(state, word)
                     )

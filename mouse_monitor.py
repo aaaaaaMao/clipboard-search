@@ -107,7 +107,7 @@ class MouseMonitor:
             content = wc.GetClipboardData(win32con.CF_UNICODETEXT)
             wc.CloseClipboard()
         except Exception as e:
-            self.log('Clipboard Content is TypeError.', e)
+            self.log('Clipboard Content error' + e)
 
         self._content = content
         return content
@@ -129,7 +129,7 @@ class MouseMonitor:
         if self._debug:
             print(f'select:\n{content}')
 
-        if self._signal:
+        if content and self._signal:
             self._signal.emit()
 
     def log(self, message):
