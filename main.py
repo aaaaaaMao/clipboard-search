@@ -1,5 +1,6 @@
 import sys
 import logging
+import json
 
 from PyQt5 import QtWidgets, QtNetwork
 from PyQt5.QtWidgets import (
@@ -23,6 +24,7 @@ import keyboard
 
 from utils import parse_hujiang_html
 from mouse_monitor import MouseMonitor
+from db import save_word, is_favorite
 
 
 logging.basicConfig(
@@ -176,6 +178,8 @@ class MainWindow(QMainWindow):
                     widget = QWidget()
                     text = QLabel(str(word))
                     check = QCheckBox()
+                    if is_favorite(word.word):
+                        check.setChecked()
                     check.stateChanged.connect(
                         lambda state: self.on_box_checked(state, word)
                     )
@@ -202,7 +206,7 @@ class MainWindow(QMainWindow):
 
     def show_window(self):
         if (self.isMinimized() or not self.isVisible()) and self.copy_text:
-            self.move(self.pos_x, self.pos_y)
+            self.move(self.pos_x + 20, self.pos_y)
 
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
             if self.icon_window.isVisible():
@@ -236,6 +240,12 @@ class MainWindow(QMainWindow):
     def on_box_checked(self, state, word):
         if state == Qt.Checked:
             logging.info('Check: ' + str(word).replace('\n', ''))
+            save_word(word.word, 'hujiang', json.dumps({
+                'word': word.word,
+                'pronounces': word.pronounces,
+                'word_type': word.word_type,
+                'word_type': word.translation,
+            }))
         else:
             logging.info('Cancel: ')
 
