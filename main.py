@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
     QAction,
     QSystemTrayIcon,
 )
-from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QCoreApplication
+from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QCoreApplication, QEvent, QTimer
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
 import keyboard
 
@@ -97,6 +97,11 @@ class MainWindow(QMainWindow):
         self.copy_text = ''
 
         self.in_main_window = False
+
+        self.installEventFilter(self)
+        self.icon_window_timer = QTimer()
+        self.icon_window_timer.timeout.connect(
+            self.on_show_icon_window_timeout)
 
     def init_ui(self):
 
@@ -225,6 +230,7 @@ class MainWindow(QMainWindow):
         if self.isVisible():
             self.hide()
         self.icon_window.show()
+        self.icon_window_timer.start(1500)
 
     def copy_to_clipboard(self, text):
         cb = QApplication.clipboard()
@@ -257,11 +263,18 @@ class MainWindow(QMainWindow):
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
             self.showNormal()
 
-    def enterEvent(self, event):
-        self.in_main_window = True
+    def eventFilter(self, source: 'QObject', event: 'QEvent') -> bool:
+        if source == self:
+            if event.type() == QEvent.WindowDeactivate:
+                self.in_main_window = False
+                self.hide()
+            if event.type() == QEvent.WindowActivate:
+                self.in_main_window = True
+        return super().eventFilter(source, event)
 
-    def leaveEvent(self, event):
-        self.in_main_window = False
+    def on_show_icon_window_timeout(self):
+        self.icon_window_timer.stop()
+        self.icon_window.hide()
 
 
 class Worker(QObject):
