@@ -24,7 +24,7 @@ import keyboard
 
 from utils import parse_hujiang_html
 from mouse_monitor import MouseMonitor
-from db import save_word, is_favorite
+from db import save_word, list_words
 
 
 logging.basicConfig(
@@ -149,7 +149,7 @@ class MainWindow(QMainWindow):
     def search_from_hujiang(self, word):
         HEADERS = config['hujiang']['req_headers']
 
-        url = 'https://dict.hjenglish.com/jp/jc/' + word
+        url = config['hujiang']['req_url'] + word
         req = QtNetwork.QNetworkRequest(QUrl(url))
         for k in HEADERS:
             req.setRawHeader(bytes(k, 'utf-8'), bytes(HEADERS[k], 'utf-8'))
@@ -165,38 +165,43 @@ class MainWindow(QMainWindow):
             bytes_string = resp.readAll()
             result = parse_hujiang_html(str(bytes_string, 'utf-8'))
 
-            self.list_widget.clear()
-            if len(result) > 0:
-                for word in result:
-                    item = QListWidgetItem()
-                    widget = QWidget()
-                    text = QLabel(str(word))
-                    check = QCheckBox()
-                    if is_favorite(word.word):
-                        check.setChecked(True)
-                    check.stateChanged.connect(
-                        lambda state: self.on_box_checked(state, word)
-                    )
-                    layout = QHBoxLayout()
-                    layout.addWidget(check)
-                    layout.addWidget(text)
-
-                    layout.setSizeConstraint(
-                        QtWidgets.QLayout.SizeConstraint.SetFixedSize
-                    )
-                    widget.setLayout(layout)
-                    size = widget.sizeHint()
-                    size.setHeight(size.height() + 50)
-                    item.setSizeHint(size)
-
-                    self.list_widget.addItem(item)
-                    self.list_widget.setItemWidget(item, widget)
-
-                self.copy_to_clipboard(str(result[0]))
-            else:
-                self.list_widget.addItem('Not Found.')
+            self.show_word_list(result)
         else:
             logging.error(resp.errorString())
+
+    def show_word_list(self, words):
+        self.list_widget.clear()
+        if len(words) > 0:
+            for word in words:
+                item = QListWidgetItem()
+                widget = QWidget()
+                text = QLabel(str(word))
+                check = QCheckBox()
+
+                if list_words(word.word):
+                    check.setChecked(True)
+
+                check.stateChanged.connect(
+                    lambda state: self.on_box_checked(state, word)
+                )
+                layout = QHBoxLayout()
+                layout.addWidget(check)
+                layout.addWidget(text)
+
+                layout.setSizeConstraint(
+                    QtWidgets.QLayout.SizeConstraint.SetFixedSize
+                )
+                widget.setLayout(layout)
+                size = widget.sizeHint()
+                size.setHeight(size.height() + 50)
+                item.setSizeHint(size)
+
+                self.list_widget.addItem(item)
+                self.list_widget.setItemWidget(item, widget)
+
+            self.copy_to_clipboard(str(words[0]))
+        else:
+            self.list_widget.addItem('Not Found.')
 
     def show_window(self):
         if (self.isMinimized() or not self.isVisible()) and self.copy_text:
