@@ -26,6 +26,4 @@ def list_words(word):
 
 
 def is_favorite(word):
-    sql = f'SELECT * FROM words WHERE word="{word}"'
-    cur.execute(sql)
-    return cur.fetchall()
+    return list_words(word)

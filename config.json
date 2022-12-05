@@ -1,0 +1,20 @@
+{
+    "hujiang": {
+        "req_headers": {
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "accept-language": "zh-CN,zh;q=0.9",
+            "if-none-match": "\"69e1-2qJE+HGIwbzci5d+JKQcu+1SlwM\"",
+            "sec-ch-ua": "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"101\", \"Google Chrome\";v=\"101\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "same-origin",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "cookie": "HJ_UID=5df5cfc1-0b21-950e-0a2a-aeba7e3a2fa7; TRACKSITEMAP=3; _UZT_USER_SET_106_0_DEFAULT=2|6ed2e0a3900e22cb93d3dd68d679fad2; acw_tc=76b20f7616524644555637605e354ddb0a9fd34d9a07c51841838fd806ddd5; HJ_CST=0; _SREF_3=https://dict.hjenglish.com/; _REF=https://dict.hjenglish.com/; HJ_SID=ygaq09-0c63-48fb-afee-d54d00fed793; HJ_SSID_3=ygaq09-eebd-4102-b634-f5e66ff1fade; HJ_CSST_3=1; _SREG_3=dict.hjenglish.com||xiaodi_site|domain; _REG=dict.hjenglish.com||xiaodi_site|domain",
+            "Referer": "https://dict.hjenglish.com/jp/jc/%E3%81%84",
+            "Referrer-Policy": "no-referrer-when-downgrade"
+        }
+    }
+}
