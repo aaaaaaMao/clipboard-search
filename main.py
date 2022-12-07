@@ -24,7 +24,7 @@ import keyboard
 
 from utils import parse_hujiang_html
 from mouse_monitor import MouseMonitor
-from db import save_word, list_words
+from db import save_word, get_by_word_and_kana, dump_to_json
 
 
 logging.basicConfig(
@@ -96,6 +96,7 @@ class MainWindow(QMainWindow):
         self.thread.start()
 
         self.quit_action.triggered.connect(self.quit_app)
+        self.dump_action.triggered.connect(self.dump_db_data)
         self.tray_icon.activated.connect(self.on_tray_icon_activated)
 
         self.copy_text = ''
@@ -127,10 +128,12 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(main_widget)
 
         self.quit_action = QAction('Quit')
+        self.dump_action = QAction('Dump')
         # self.quit_action.setIcon(QIcon.fromTheme('application-exit'))
 
         self.tray_icon_memu = QMenu()
         self.tray_icon_memu.addAction(self.quit_action)
+        self.tray_icon_memu.addAction(self.dump_action)
         self.tray_icon = QSystemTrayIcon()
         self.tray_icon.setIcon(self.main_icon)
         self.tray_icon.setContextMenu(self.tray_icon_memu)
@@ -178,7 +181,7 @@ class MainWindow(QMainWindow):
                 text = QLabel(str(word))
                 check = QCheckBox()
 
-                if list_words(word.word):
+                if get_by_word_and_kana(word.word, word.pronounces):
                     check.setChecked(True)
 
                 check.stateChanged.connect(
@@ -240,17 +243,20 @@ class MainWindow(QMainWindow):
     def on_box_checked(self, state, word):
         if state == Qt.Checked:
             logging.info('Check: ' + str(word).replace('\n', ''))
-            save_word(word.word, 'hujiang', json.dumps({
+            save_word(word.word, word.pronounces, 'hujiang', json.dumps({
                 'word': word.word,
                 'pronounces': word.pronounces,
                 'word_type': word.word_type,
-                'word_type': word.translation,
-            }))
+                'translation': word.translation,
+            }, ensure_ascii=False))
         else:
             logging.info('Cancel: ')
 
     def quit_app(self):
         QCoreApplication.quit()
+
+    def dump_db_data(self):
+        dump_to_json()
 
     def on_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
