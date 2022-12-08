@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import (
     QMenu,
     QAction,
     QSystemTrayIcon,
+    QLineEdit
 )
 from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QCoreApplication, QEvent, QTimer
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
@@ -118,11 +119,23 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(self.main_icon)
 
         vbox = QVBoxLayout()
+
+        hbox = QHBoxLayout()
+        search_label = QLabel()
+        search_label.setText('search: ')
+        self.search_input = QLineEdit()
+        self.search_input.returnPressed.connect(
+            lambda: self.search_from_hujiang(self.search_input.text())
+        )
+        hbox.addWidget(search_label)
+        hbox.addWidget(self.search_input)
+        vbox.addLayout(hbox)
+
         self.list_widget = QListWidget()
         self.list_widget.addItem('Waiting copy')
         self.list_widget.itemDoubleClicked.connect(self.on_list_item_clicked)
-
         vbox.addWidget(self.list_widget)
+
         main_widget = QWidget()
         main_widget.setLayout(vbox)
         self.setCentralWidget(main_widget)
@@ -147,6 +160,7 @@ class MainWindow(QMainWindow):
         if self.copy_text:
             logging.info(f'Search: {self.copy_text}')
             self.show_window()
+            self.search_input.clear()
             self.search_from_hujiang(self.copy_text)
 
     def search_from_hujiang(self, word):
