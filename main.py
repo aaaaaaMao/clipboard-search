@@ -1,6 +1,7 @@
 import sys
 import logging
 import json
+import traceback
 
 from PyQt5 import QtWidgets, QtNetwork
 from PyQt5.QtWidgets import (
@@ -107,7 +108,11 @@ class MainWindow(QMainWindow):
         self.installEventFilter(self)
         self.icon_window_timer = QTimer()
         self.icon_window_timer.timeout.connect(
-            self.on_show_icon_window_timeout)
+            self.on_show_icon_window_timeout
+        )
+
+        self.old_hook = sys.excepthook
+        sys.excepthook = self.catch_exceptions
 
     def init_ui(self):
 
@@ -289,6 +294,15 @@ class MainWindow(QMainWindow):
     def on_show_icon_window_timeout(self):
         self.icon_window_timer.stop()
         self.icon_window.hide()
+
+    def catch_exceptions(self, err_type, err_value, err_traceback):
+        traceback_format = traceback.format_exception(
+            err_type,
+            err_value,
+            err_traceback
+        )
+        logging.error("".join(traceback_format))
+        self.old_hook(err_type, err_value, err_traceback)
 
 
 class Worker(QObject):
