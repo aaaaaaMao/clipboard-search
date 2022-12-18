@@ -24,9 +24,9 @@ from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QCoreApp
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
 import keyboard
 
-from utils import parse_hujiang_html
+from utils import parse_hujiang_html, JPWord
 from mouse_monitor import MouseMonitor
-from db import save_word, get_by_word_and_kana, dump_to_json
+from db import save_word, get_by_word_and_kana, dump_to_json, search_word_from_dict
 
 
 logging.basicConfig(
@@ -166,7 +166,12 @@ class MainWindow(QMainWindow):
             logging.info(f'Search: {self.copy_text}')
             self.show_window()
             self.search_input.clear()
-            self.search_from_hujiang(self.copy_text)
+
+            words = search_word_from_dict(self.copy_text)
+            if not words or not len(words):
+                self.search_from_hujiang(self.copy_text)
+            else:
+                self.show_word_list(words)
 
     def search_from_hujiang(self, word):
         HEADERS = config['hujiang']['req_headers']
@@ -197,17 +202,21 @@ class MainWindow(QMainWindow):
             for word in words:
                 item = QListWidgetItem()
                 widget = QWidget()
-                text = QLabel(str(word))
-                check = QCheckBox()
+                text = None
 
-                if get_by_word_and_kana(word.word, word.pronounces):
-                    check.setChecked(True)
-
-                check.stateChanged.connect(
-                    lambda state: self.on_box_checked(state, word)
-                )
                 layout = QHBoxLayout()
-                layout.addWidget(check)
+
+                if isinstance(word, JPWord):
+                    text = QLabel(str(word))
+                    check = QCheckBox()
+                    if get_by_word_and_kana(word.word, word.pronounces):
+                        check.setChecked(True)
+                    check.stateChanged.connect(
+                        lambda state: self.on_box_checked(state, word)
+                    )
+                    layout.addWidget(check)
+                else:
+                    text = QLabel(word['content'])
                 layout.addWidget(text)
 
                 layout.setSizeConstraint(
@@ -220,8 +229,6 @@ class MainWindow(QMainWindow):
 
                 self.list_widget.addItem(item)
                 self.list_widget.setItemWidget(item, widget)
-
-            self.copy_to_clipboard(str(words[0]))
         else:
             self.list_widget.addItem('Not Found.')
 
