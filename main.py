@@ -12,7 +12,6 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QListWidget,
     QListWidgetItem,
-    QMessageBox,
     QLabel,
     QCheckBox,
     QMenu,
@@ -24,8 +23,8 @@ from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QCoreApp
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
 import keyboard
 
-from utils import parse_hujiang_html, JPWord
-from mouse_monitor import MouseMonitor
+from utils.hujiang import parse_hujiang_html, JPWord
+from utils.mouse_monitor import MouseMonitor
 from db import save_word, get_by_word_and_kana, dump_to_json, search_word_from_dict
 
 
@@ -323,9 +322,12 @@ class Worker(QObject):
         keyboard.wait()
 
 
-if __name__ == '__main__':
+def main():
     app = QtWidgets.QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     mainWin = MainWindow()
-    # mainWin.show()
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()
