@@ -14,8 +14,6 @@ from PyQt5.QtWidgets import (
     QListWidgetItem,
     QLabel,
     QCheckBox,
-    QMenu,
-    QAction,
     QSystemTrayIcon,
     QLineEdit
 )
@@ -24,6 +22,7 @@ from PyQt5.QtGui import QIcon, QCursor, QPixmap
 import keyboard
 
 from src.views.float_icon_window import FloatIconWindow
+from src.views.tray_icon import TrayIcon
 from utils.hujiang import parse_hujiang_html, JPWord
 from utils.mouse_monitor import MouseMonitor
 from db import save_word, get_by_word_and_kana, dump_to_json, search_word_from_dict
@@ -65,8 +64,7 @@ class MainWindow(QMainWindow):
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
 
-        self.quit_action.triggered.connect(self.quit_app)
-        self.dump_action.triggered.connect(self.dump_db_data)
+        self.tray_icon.dump_action.triggered.connect(self.dump_db_data)
         self.tray_icon.activated.connect(self.on_tray_icon_activated)
 
         self.copy_text = ''
@@ -113,20 +111,8 @@ class MainWindow(QMainWindow):
         main_widget.setLayout(vbox)
         self.setCentralWidget(main_widget)
 
-        self.quit_action = QAction('Quit')
-        self.dump_action = QAction('Dump')
-        # self.quit_action.setIcon(QIcon.fromTheme('application-exit'))
-
-        self.tray_icon_memu = QMenu()
-        self.tray_icon_memu.addAction(self.quit_action)
-        self.tray_icon_memu.addAction(self.dump_action)
-        self.tray_icon = QSystemTrayIcon()
-        self.tray_icon.setIcon(self.main_icon)
-        self.tray_icon.setContextMenu(self.tray_icon_memu)
+        self.tray_icon = TrayIcon(self.main_icon)
         self.tray_icon.show()
-
-        # self.show()
-        # self.icon_window.show()
 
     def search(self):
         self.copy_text = QApplication.clipboard().text()
