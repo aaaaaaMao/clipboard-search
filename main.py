@@ -23,6 +23,7 @@ from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QCoreApp
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
 import keyboard
 
+from src.views.float_icon_window import FloatIconWindow
 from utils.hujiang import parse_hujiang_html, JPWord
 from utils.mouse_monitor import MouseMonitor
 from db import save_word, get_by_word_and_kana, dump_to_json, search_word_from_dict
@@ -41,39 +42,6 @@ with open('./config.json', 'r', encoding='utf8') as f:
     config = json.load(f)
 
 
-class IconWindow(QWidget):
-
-    search_signal = pyqtSignal()
-
-    def __init__(self):
-        super().__init__()
-        self.init_ui()
-
-    def init_ui(self):
-
-        self.setGeometry(100, 100, 100, 100)
-
-        pix = QPixmap('./images/battery.png').scaled(
-            45,
-            45,
-            Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation
-        )
-        label = QLabel(self)
-        label.setPixmap(pix)
-        self.resize(pix.width(), pix.height())
-        self.setMask(pix.mask())
-
-        self.setWindowFlags(Qt.ToolTip)
-
-        # 设置背景透明
-        self.setAttribute(Qt.WA_TranslucentBackground)
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.search_signal.emit()
-
-
 class MainWindow(QMainWindow):
 
     def __init__(self):
@@ -82,7 +50,8 @@ class MainWindow(QMainWindow):
         self.pos_x = 10
         self.pos_y = 10
 
-        self.icon_window = IconWindow()
+        float_icon = QPixmap('./images/battery.png')
+        self.icon_window = FloatIconWindow(float_icon)
         self.icon_window.search_signal.connect(self.search)
         self.init_ui()
 
