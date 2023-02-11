@@ -39,3 +39,20 @@ def get_by_word_and_kana(word, kana):
                 JPWord.kana == kana
             )
         ).all()
+
+
+def dump_to_json(file='./data/favorites.json'):
+    import json
+
+    with Session() as session:
+        result = []
+        for item in session.query(JPWord).filter().all():
+            result.append({
+                'word': item.word,
+                'kana': item.kana,
+                'source': item.source,
+                'content': json.loads(item.content),
+                'created_time': item.created_time.isoformat(),
+            })
+        with open(file, 'w', encoding='utf8') as f:
+            json.dump(result, f, ensure_ascii=False, indent=2)

@@ -35,16 +35,17 @@ def parse_hujiang_html(html):
                     translation = [re.sub(r'\d+\.\s*', '', translation[0])]
 
                 pronounces = re.sub(r'\[|\]', '', pronounces)
-                result.append(JPWord(word, pronounces, word_type, translation))
+                result.append(
+                    JPWordHj(word, pronounces, word_type, translation))
         else:
             pronounces = re.sub(r'\[|\]', '', pronounces)
-            result.append(JPWord(word, pronounces, word_type, translation))
+            result.append(JPWordHj(word, pronounces, word_type, translation))
 
     return result
 
 
 @dataclass
-class JPWord:
+class JPWordHj:
     word: str
     pronounces: str
     word_type: str

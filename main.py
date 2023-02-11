@@ -18,15 +18,15 @@ from PyQt5.QtWidgets import (
     QSystemTrayIcon,
     QLineEdit
 )
-from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QCoreApplication, QEvent, QTimer
+from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QEvent, QTimer
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
 import keyboard
 
 from src.views.float_icon_window import FloatIconWindow
 from src.views.tray_icon import TrayIcon
-from utils.hujiang import parse_hujiang_html, JPWord
+from utils.hujiang import parse_hujiang_html, JPWordHj
 from utils.mouse_monitor import MouseMonitor
-from db import dump_to_json, search_word_from_dict
+from db import search_word_from_dict
 from src.services.jp_word import save_word, get_by_word_and_kana
 
 
@@ -70,7 +70,6 @@ class MainWindow(QMainWindow):
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
 
-        self.tray_icon.dump_action.triggered.connect(self.dump_db_data)
         self.tray_icon.activated.connect(self.on_tray_icon_activated)
 
         self.copy_text = ''
@@ -166,7 +165,7 @@ class MainWindow(QMainWindow):
 
                 layout = QHBoxLayout()
 
-                if isinstance(word, JPWord):
+                if isinstance(word, JPWordHj):
                     text = QLabel(str(word))
                     check = QCheckBox()
                     if get_by_word_and_kana(word.word, word.pronounces):
@@ -237,12 +236,6 @@ class MainWindow(QMainWindow):
             }, ensure_ascii=False))
         else:
             logging.info('Cancel: ')
-
-    def quit_app(self):
-        QCoreApplication.quit()
-
-    def dump_db_data(self):
-        dump_to_json()
 
     def on_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
