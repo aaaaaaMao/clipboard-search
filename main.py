@@ -27,7 +27,8 @@ from src.views.tray_icon import TrayIcon
 from utils.hujiang import parse_hujiang_html, JPWordHj
 from utils.mouse_monitor import MouseMonitor
 from db import search_word_from_dict
-from src.services.jp_word import save_word, get_by_word_and_kana
+from src.services.jp_word import save_word, get_by_word_and_kana, list_words, remove_word_by_id
+from src.models.jp_word import JPWord
 
 
 logging.basicConfig(
@@ -126,7 +127,9 @@ class MainWindow(QMainWindow):
             self.show_window()
             self.search_input.clear()
 
-            words = search_word_from_dict(self.copy_text)
+            words = list_words(self.copy_text)
+            words.extend(search_word_from_dict(self.copy_text))
+
             if not words or not len(words):
                 self.search_from_hujiang(self.copy_text)
             else:
@@ -170,6 +173,23 @@ class MainWindow(QMainWindow):
                     check = QCheckBox()
                     if get_by_word_and_kana(word.word, word.pronounces):
                         check.setChecked(True)
+                    check.stateChanged.connect(
+                        lambda state: self.on_box_checked(state, word)
+                    )
+                    layout.addWidget(check)
+                elif isinstance(word, JPWord):
+                    if word.source == 'hujiang':
+                        hj_word = json.loads(word.content)
+                        text = QLabel(str(JPWordHj(
+                            hj_word['word'],
+                            hj_word['pronounces'],
+                            hj_word['word_type'],
+                            hj_word['translation'],
+                        )))
+                    else:
+                        text = QLabel(word.content)
+                    check = QCheckBox()
+                    check.setChecked(True)
                     check.stateChanged.connect(
                         lambda state: self.on_box_checked(state, word)
                     )
@@ -227,15 +247,17 @@ class MainWindow(QMainWindow):
 
     def on_box_checked(self, state, word):
         if state == Qt.Checked:
-            logging.info('Check: ' + str(word).replace('\n', ''))
             save_word(word.word, word.pronounces, 'hujiang', json.dumps({
                 'word': word.word,
                 'pronounces': word.pronounces,
                 'word_type': word.word_type,
                 'translation': word.translation,
             }, ensure_ascii=False))
+            logging.info(f'Check: {word["word"]}')
         else:
-            logging.info('Cancel: ')
+            if isinstance(word, JPWord):
+                remove_word_by_id(word.id)
+                logging.info(f'Cancel: {word.word}')
 
     def on_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:

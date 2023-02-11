@@ -21,6 +21,13 @@ def save_word(word, kana, source, content):
         session.commit()
 
 
+def remove_word_by_id(id):
+    with Session() as session:
+        record = session.query(JPWord).filter_by(id=id).first()
+        session.delete(record)
+        session.commit()
+
+
 def list_words(word):
     with Session() as session:
         return session.query(JPWord).filter(
