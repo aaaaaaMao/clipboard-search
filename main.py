@@ -2,6 +2,7 @@ import sys
 import logging
 import json
 import traceback
+import os
 
 from PyQt5 import QtWidgets, QtNetwork
 from PyQt5.QtWidgets import (
@@ -25,7 +26,8 @@ from src.views.float_icon_window import FloatIconWindow
 from src.views.tray_icon import TrayIcon
 from utils.hujiang import parse_hujiang_html, JPWord
 from utils.mouse_monitor import MouseMonitor
-from db import save_word, get_by_word_and_kana, dump_to_json, search_word_from_dict
+from db import dump_to_json, search_word_from_dict
+from src.services.jp_word import save_word, get_by_word_and_kana
 
 
 logging.basicConfig(
@@ -39,6 +41,10 @@ logging.basicConfig(
 config = {}
 with open('./config.json', 'r', encoding='utf8') as f:
     config = json.load(f)
+
+data_dir = './data'
+if not os.path.exists(data_dir):
+    os.mkdir(data_dir)
 
 
 class MainWindow(QMainWindow):

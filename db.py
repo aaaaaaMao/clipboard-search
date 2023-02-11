@@ -31,26 +31,6 @@ cur.execute('''CREATE TABLE IF NOT EXISTS words
             created_time INTEGER);''')
 
 
-def save_word(word, kana, source, content):
-    cur.execute(
-        'INSERT INTO words VALUES (?,?,?,?,?)',
-        (word, kana, source, content, int(round(time.time() * 1000)))
-    )
-    conn.commit()
-
-
-def list_words(word):
-    sql = f'SELECT * FROM words WHERE word="{word}" OR kana="{word}"'
-    cur.execute(sql)
-    return cur.fetchall()
-
-
-def get_by_word_and_kana(word, kana):
-    sql = f'SELECT * FROM words WHERE word="{word}" AND kana="{kana}"'
-    cur.execute(sql)
-    return cur.fetchall()
-
-
 def dump_to_json(file='./favorites.json'):
     sql = 'SELECT * FROM words'
     cur.execute(sql)

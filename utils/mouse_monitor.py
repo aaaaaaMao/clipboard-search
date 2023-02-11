@@ -59,7 +59,7 @@ class MouseMonitor:
             if self.check_not_time_out(
                     self._press_time,
                     time.time(),
-                    0.8
+                    0.6
             ):
                 content = self.get_copy()
                 self.log(f'double click: {content}')
