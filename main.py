@@ -26,9 +26,9 @@ from src.views.float_icon_window import FloatIconWindow
 from src.views.tray_icon import TrayIcon
 from utils.hujiang import parse_hujiang_html, JPWordHj
 from utils.mouse_monitor import MouseMonitor
-from db import search_word_from_dict
 from src.services.jp_word import save_word, get_by_word_and_kana, list_words, remove_word_by_id
 from src.models.jp_word import JPWord
+from src.services.dictionary import search as search_word_from_dict
 
 
 logging.basicConfig(
@@ -195,7 +195,7 @@ class MainWindow(QMainWindow):
                     )
                     layout.addWidget(check)
                 else:
-                    text = QLabel(word['content'])
+                    text = QLabel(word.content)
                 layout.addWidget(text)
 
                 layout.setSizeConstraint(
@@ -253,7 +253,7 @@ class MainWindow(QMainWindow):
                 'word_type': word.word_type,
                 'translation': word.translation,
             }, ensure_ascii=False))
-            logging.info(f'Check: {word["word"]}')
+            logging.info(f'Check: {word.word}')
         else:
             if isinstance(word, JPWord):
                 remove_word_by_id(word.id)
