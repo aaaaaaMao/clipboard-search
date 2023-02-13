@@ -3,6 +3,10 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+data_dir = './data'
+if not os.path.exists(data_dir):
+    os.mkdir(data_dir)
+
 favorites_engine = create_engine(
     'sqlite:///data/favorites.db?check_same_thread=False')
 

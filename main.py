@@ -1,10 +1,9 @@
 import sys
-import logging
 import json
 import traceback
 import os
 
-from PyQt5 import QtWidgets, QtNetwork
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -18,26 +17,19 @@ from PyQt5.QtWidgets import (
     QSystemTrayIcon,
     QLineEdit
 )
-from PyQt5.QtCore import QSize, Qt, QUrl, QObject, QThread, pyqtSignal, QEvent, QTimer
+from PyQt5.QtCore import QSize, Qt, QObject, QThread, pyqtSignal, QEvent, QTimer
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
 import keyboard
 
+from src import logging
 from src.views.float_icon_window import FloatIconWindow
 from src.views.tray_icon import TrayIcon
-from utils.hujiang import parse_hujiang_html, JPWordHj
 from utils.mouse_monitor import MouseMonitor
 from src.services.jp_word import save_word, get_by_word_and_kana, list_words, remove_word_by_id
 from src.models.jp_word import JPWord
 from src.services.dictionary import search as search_word_from_dict
+from src.services.hujiang import HuJiang, JPWordHj
 
-
-logging.basicConfig(
-    format='%(levelname)s - %(asctime)s - %(message)s',
-    filename='app.log',
-    filemode='a',
-    encoding='utf8',
-    level=logging.INFO
-)
 
 config = {}
 with open('./config.json', 'r', encoding='utf8') as f:
@@ -50,6 +42,8 @@ if not os.path.exists(data_dir):
 
 class MainWindow(QMainWindow):
 
+    search_succeed_signal = pyqtSignal(list)
+
     def __init__(self):
         QMainWindow.__init__(self)
 
@@ -59,6 +53,10 @@ class MainWindow(QMainWindow):
         float_icon = QPixmap('./images/battery.png')
         self.icon_window = FloatIconWindow(float_icon)
         self.icon_window.search_signal.connect(self.search)
+
+        self.search_succeed_signal.connect(self.show_word_list)
+        self.hujiang = HuJiang(config, self.search_succeed_signal)
+
         self.init_ui()
 
         self.thread = QThread()
@@ -131,32 +129,9 @@ class MainWindow(QMainWindow):
             words.extend(search_word_from_dict(self.copy_text))
 
             if not words or not len(words):
-                self.search_from_hujiang(self.copy_text)
+                self.hujiang.search(self.copy_text)
             else:
                 self.show_word_list(words)
-
-    def search_from_hujiang(self, word):
-        HEADERS = config['hujiang']['req_headers']
-
-        url = config['hujiang']['req_url'] + word
-        req = QtNetwork.QNetworkRequest(QUrl(url))
-        for k in HEADERS:
-            req.setRawHeader(bytes(k, 'utf-8'), bytes(HEADERS[k], 'utf-8'))
-
-        self.nam = QtNetwork.QNetworkAccessManager()
-        self.nam.finished.connect(self.handle_resp)
-        self.nam.get(req)
-
-    def handle_resp(self, resp):
-        err = resp.error()
-
-        if err == QtNetwork.QNetworkReply.NoError:
-            bytes_string = resp.readAll()
-            result = parse_hujiang_html(str(bytes_string, 'utf-8'))
-
-            self.show_word_list(result)
-        else:
-            logging.error(resp.errorString())
 
     def show_word_list(self, words):
         self.list_widget.clear()
