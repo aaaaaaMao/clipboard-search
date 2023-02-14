@@ -1,7 +1,6 @@
 import sys
 import json
 import traceback
-import os
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (
@@ -10,10 +9,7 @@ from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QHBoxLayout,
-    QListWidget,
-    QListWidgetItem,
     QLabel,
-    QCheckBox,
     QSystemTrayIcon,
     QLineEdit
 )
@@ -24,11 +20,13 @@ import keyboard
 from src import logging, config
 from src.views.float_icon_window import FloatIconWindow
 from src.views.tray_icon import TrayIcon
+from src.views.word_list import WordList
+
 from utils.mouse_monitor import MouseMonitor
-from src.services.jp_word import save_word, get_by_word_and_kana, list_words, remove_word_by_id
+from src.services.jp_word import save_word, list_words, remove_word_by_id
 from src.models.jp_word import JPWord
 from src.services.dictionary import search as search_word_from_dict
-from src.services.hujiang import HuJiang, JPWordHj
+from src.services.hujiang import HuJiang
 
 
 class MainWindow(QMainWindow):
@@ -45,7 +43,7 @@ class MainWindow(QMainWindow):
         self.icon_window = FloatIconWindow(float_icon)
         self.icon_window.search_signal.connect(self.search)
 
-        self.search_succeed_signal.connect(self.show_word_list)
+        self.search_succeed_signal.connect(self.show_words)
         self.hujiang = HuJiang(config, self.search_succeed_signal)
 
         self.init_ui()
@@ -97,10 +95,8 @@ class MainWindow(QMainWindow):
         hbox.addWidget(self.search_input)
         vbox.addLayout(hbox)
 
-        self.list_widget = QListWidget()
-        self.list_widget.addItem('Waiting copy')
-        self.list_widget.itemDoubleClicked.connect(self.on_list_item_clicked)
-        vbox.addWidget(self.list_widget)
+        self.word_list = WordList()
+        vbox.addWidget(self.word_list)
 
         main_widget = QWidget()
         main_widget.setLayout(vbox)
@@ -122,60 +118,10 @@ class MainWindow(QMainWindow):
             if not words or not len(words):
                 self.hujiang.search(self.copy_text)
             else:
-                self.show_word_list(words)
+                self.show_words(words)
 
-    def show_word_list(self, words):
-        self.list_widget.clear()
-        if len(words) > 0:
-            for word in words:
-                item = QListWidgetItem()
-                widget = QWidget()
-                text = None
-
-                layout = QHBoxLayout()
-
-                if isinstance(word, JPWordHj):
-                    text = QLabel(str(word))
-                    check = QCheckBox()
-                    if get_by_word_and_kana(word.word, word.pronounces):
-                        check.setChecked(True)
-                    check.stateChanged.connect(
-                        lambda state: self.on_box_checked(state, word)
-                    )
-                    layout.addWidget(check)
-                elif isinstance(word, JPWord):
-                    if word.source == 'hujiang':
-                        hj_word = json.loads(word.content)
-                        text = QLabel(str(JPWordHj(
-                            hj_word['word'],
-                            hj_word['pronounces'],
-                            hj_word['word_type'],
-                            hj_word['translation'],
-                        )))
-                    else:
-                        text = QLabel(word.content)
-                    check = QCheckBox()
-                    check.setChecked(True)
-                    check.stateChanged.connect(
-                        lambda state: self.on_box_checked(state, word)
-                    )
-                    layout.addWidget(check)
-                else:
-                    text = QLabel(word.content)
-                layout.addWidget(text)
-
-                layout.setSizeConstraint(
-                    QtWidgets.QLayout.SizeConstraint.SetFixedSize
-                )
-                widget.setLayout(layout)
-                size = widget.sizeHint()
-                size.setHeight(size.height() + 50)
-                item.setSizeHint(size)
-
-                self.list_widget.addItem(item)
-                self.list_widget.setItemWidget(item, widget)
-        else:
-            self.list_widget.addItem('Not Found.')
+    def show_words(self, words):
+        self.word_list.show_words(words)
 
     def show_window(self):
         if (self.isMinimized() or not self.isVisible()) and self.copy_text:
@@ -204,26 +150,6 @@ class MainWindow(QMainWindow):
         cb = QApplication.clipboard()
         cb.clear(mode=cb.Clipboard)
         cb.setText(text + '\n', mode=cb.Clipboard)
-
-    def on_list_item_clicked(self, item: QListWidgetItem):
-        widget = self.list_widget.itemWidget(item)
-        lebel = widget.findChild(QLabel)
-        self.copy_to_clipboard(lebel.text())
-        # QMessageBox.information(self, 'Info', 'Copied!')
-
-    def on_box_checked(self, state, word):
-        if state == Qt.Checked:
-            save_word(word.word, word.pronounces, 'hujiang', json.dumps({
-                'word': word.word,
-                'pronounces': word.pronounces,
-                'word_type': word.word_type,
-                'translation': word.translation,
-            }, ensure_ascii=False))
-            logging.info(f'Check: {word.word}')
-        else:
-            if isinstance(word, JPWord):
-                remove_word_by_id(word.id)
-                logging.info(f'Cancel: {word.word}')
 
     def on_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
