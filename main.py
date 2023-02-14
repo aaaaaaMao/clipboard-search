@@ -21,7 +21,7 @@ from PyQt5.QtCore import QSize, Qt, QObject, QThread, pyqtSignal, QEvent, QTimer
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
 import keyboard
 
-from src import logging
+from src import logging, config
 from src.views.float_icon_window import FloatIconWindow
 from src.views.tray_icon import TrayIcon
 from utils.mouse_monitor import MouseMonitor
@@ -29,15 +29,6 @@ from src.services.jp_word import save_word, get_by_word_and_kana, list_words, re
 from src.models.jp_word import JPWord
 from src.services.dictionary import search as search_word_from_dict
 from src.services.hujiang import HuJiang, JPWordHj
-
-
-config = {}
-with open('./config.json', 'r', encoding='utf8') as f:
-    config = json.load(f)
-
-data_dir = './data'
-if not os.path.exists(data_dir):
-    os.mkdir(data_dir)
 
 
 class MainWindow(QMainWindow):

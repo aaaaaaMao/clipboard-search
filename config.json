@@ -17,5 +17,15 @@
             "Referrer-Policy": "no-referrer-when-downgrade"
         },
         "req_url": "https://dict.hjenglish.com/jp/jc/"
-    }
+    },
+    "dictionaries": [
+        {
+            "name": "新時代日漢辭典",
+            "search": true
+        },
+        {
+            "name": "三合一日文詞典",
+            "search": true
+        }
+    ]
 }

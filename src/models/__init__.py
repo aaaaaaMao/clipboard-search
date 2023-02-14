@@ -3,9 +3,8 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-data_dir = './data'
-if not os.path.exists(data_dir):
-    os.mkdir(data_dir)
+from src import config
+
 
 favorites_engine = create_engine(
     'sqlite:///data/favorites.db?check_same_thread=False')
@@ -21,11 +20,13 @@ def load_dictionaries(filepath='./data/dictionary'):
     if not os.path.exists(db_dir):
         os.mkdir(db_dir)
 
-    for file in os.listdir(db_dir):
-        (filename, ext) = os.path.splitext(file)
-        if os.path.exists(f'{db_dir}/{filename}.db'):
+    # for file in os.listdir(db_dir):
+    #     (filename, ext) = os.path.splitext(file)
+    for item in config['dictionaries']:
+        filename = item['name']
+        if item['search'] and os.path.exists(f'{db_dir}/{filename}.db'):
             item = {
-                'name': file,
+                'name': filename,
                 'engine': create_engine(f'sqlite:///{db_dir}/{filename}.db?check_same_thread=False')
             }
             item['Session'] = sessionmaker(bind=item['engine'])
