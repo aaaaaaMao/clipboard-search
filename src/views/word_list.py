@@ -1,4 +1,5 @@
 import json
+import os
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (
@@ -15,6 +16,11 @@ from src import logging
 from src.services.jp_word import save_word, get_by_word_and_kana, remove_word_by_id
 from src.models.jp_word import JPWord
 from src.services.hujiang import JPWordHj
+
+style_sheet = ''
+
+with open(os.path.join(os.getcwd(), './data/dictionary/db/PJE4.css'), 'r', encoding='utf8') as f:
+    style_sheet = f.read()
 
 
 class WordList(QListWidget):
@@ -41,10 +47,23 @@ class WordList(QListWidget):
 
     def add_word(self, word):
         item = QListWidgetItem()
-        widget = QWidget()
-        text = None
+        wordItem = WordListItem(word)
+
+        size = wordItem.sizeHint()
+        size.setHeight(size.height() + 50)
+        item.setSizeHint(size)
+
+        self.addItem(item)
+        self.setItemWidget(item, wordItem)
+
+
+class WordListItem(QWidget):
+
+    def __init__(self, word):
+        super().__init__()
 
         layout = QHBoxLayout()
+        text = ''
 
         if isinstance(word, JPWordHj):
             text = QLabel(str(word))
@@ -74,18 +93,14 @@ class WordList(QListWidget):
             layout.addWidget(check)
         else:
             text = QLabel(word.content)
-        layout.addWidget(text)
+            text.setStyleSheet(style_sheet)
+            print(word.content)
 
+        layout.addWidget(text)
         layout.setSizeConstraint(
             QtWidgets.QLayout.SizeConstraint.SetFixedSize
         )
-        widget.setLayout(layout)
-        size = widget.sizeHint()
-        size.setHeight(size.height() + 50)
-        item.setSizeHint(size)
-
-        self.addItem(item)
-        self.setItemWidget(item, widget)
+        self.setLayout(layout)
 
     def on_box_checked(self, state, word):
         if state == Qt.Checked:

@@ -25,6 +25,10 @@
         },
         {
             "name": "三合一日文詞典",
+            "search": false
+        },
+        {
+            "name": "プログレッシブ和英中辞典_v4",
             "search": true
         }
     ]

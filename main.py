@@ -1,5 +1,4 @@
 import sys
-import json
 import traceback
 
 from PyQt5 import QtWidgets
@@ -23,8 +22,7 @@ from src.views.tray_icon import TrayIcon
 from src.views.word_list import WordList
 
 from utils.mouse_monitor import MouseMonitor
-from src.services.jp_word import save_word, list_words, remove_word_by_id
-from src.models.jp_word import JPWord
+from src.services.jp_word import list_words
 from src.services.dictionary import search as search_word_from_dict
 from src.services.hujiang import HuJiang
 
