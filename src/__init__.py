@@ -11,6 +11,7 @@ logging.basicConfig(
 )
 
 config = {}
+word_list_style_sheet = ''
 
 
 def load_config(file: str):
@@ -28,6 +29,10 @@ def init():
 
     if not os.path.exists(data_dir):
         os.mkdir(data_dir)
+
+    global word_list_style_sheet
+    with open(os.path.join(os.getcwd(), './data/dictionary/db/PJE4.css'), 'r', encoding='utf8') as f:
+        word_list_style_sheet = f.read()
 
 
 init()

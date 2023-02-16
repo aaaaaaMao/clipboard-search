@@ -1,5 +1,5 @@
 import json
-import os
+import math
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (
@@ -12,15 +12,10 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 
-from src import logging
+from src import logging, word_list_style_sheet as style_sheet
 from src.services.jp_word import save_word, get_by_word_and_kana, remove_word_by_id
 from src.models.jp_word import JPWord
 from src.services.hujiang import JPWordHj
-
-style_sheet = ''
-
-with open(os.path.join(os.getcwd(), './data/dictionary/db/PJE4.css'), 'r', encoding='utf8') as f:
-    style_sheet = f.read()
 
 
 class WordList(QListWidget):
@@ -31,6 +26,7 @@ class WordList(QListWidget):
     def init_ui(self):
         self.addItem('Waiting copy')
         self.itemDoubleClicked.connect(self.on_item_double_clicked)
+        self.setStyleSheet(style_sheet)
 
     def on_item_double_clicked(self, item: QListWidgetItem):
         widget = self.itemWidget(item)
@@ -50,7 +46,7 @@ class WordList(QListWidget):
         wordItem = WordListItem(word)
 
         size = wordItem.sizeHint()
-        size.setHeight(size.height() + 50)
+        size.setHeight(math.ceil(size.height()*1.25))
         item.setSizeHint(size)
 
         self.addItem(item)
@@ -93,8 +89,6 @@ class WordListItem(QWidget):
             layout.addWidget(check)
         else:
             text = QLabel(word.content)
-            text.setStyleSheet(style_sheet)
-            print(word.content)
 
         layout.addWidget(text)
         layout.setSizeConstraint(
