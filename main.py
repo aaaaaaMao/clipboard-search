@@ -14,17 +14,17 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import QSize, Qt, QObject, QThread, pyqtSignal, QEvent, QTimer
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
-import keyboard
+
 
 from src import logging, config
 from src.views.float_icon_window import FloatIconWindow
 from src.views.tray_icon import TrayIcon
 from src.views.word_list import WordList
 
-from utils.mouse_monitor import MouseMonitor
 from src.services.jp_word import list_words
 from src.services.dictionary import search as search_word_from_dict
 from src.services.hujiang import HuJiang
+from src.services.mouse_monitor_worker import MouseMonitorWorker
 
 
 class MainWindow(QMainWindow):
@@ -47,7 +47,7 @@ class MainWindow(QMainWindow):
         self.init_ui()
 
         self.thread = QThread()
-        self.worker = Worker()
+        self.worker = MouseMonitorWorker()
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         self.worker.search.connect(self.show_icon_window)
@@ -176,17 +176,6 @@ class MainWindow(QMainWindow):
         )
         logging.error("".join(traceback_format))
         self.old_hook(err_type, err_value, err_traceback)
-
-
-class Worker(QObject):
-    search = pyqtSignal()
-    show_window = pyqtSignal()
-
-    def run(self):
-        # keyboard.add_hotkey('ctrl+q', lambda: self.search.emit())
-        mouse_monitor = MouseMonitor(signal=self.search)
-        keyboard.add_hotkey('alt', lambda: self.show_window.emit())
-        keyboard.wait()
 
 
 def main():
