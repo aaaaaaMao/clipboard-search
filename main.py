@@ -21,10 +21,8 @@ from src.views.float_icon_window import FloatIconWindow
 from src.views.tray_icon import TrayIcon
 from src.views.word_list import WordList
 
-from src.services.jp_word import list_words
-from src.services.dictionary import search as search_word_from_dict
-from src.services.hujiang import HuJiang
 from src.services.mouse_monitor_worker import MouseMonitorWorker
+from src.services.search_word import SearchWord
 
 
 class MainWindow(QMainWindow):
@@ -34,15 +32,22 @@ class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
 
+        self.in_main_window = False
+        self.installEventFilter(self)
+
         self.pos_x = 10
         self.pos_y = 10
 
         float_icon = QPixmap('./images/battery.png')
         self.icon_window = FloatIconWindow(float_icon)
         self.icon_window.search_signal.connect(self.search)
+        self.icon_window_timer = QTimer()
+        self.icon_window_timer.timeout.connect(
+            self.on_show_icon_window_timeout
+        )
 
         self.search_succeed_signal.connect(self.show_words)
-        self.hujiang = HuJiang(config, self.search_succeed_signal)
+        self.search_word = SearchWord(config, self.search_succeed_signal)
 
         self.init_ui()
 
@@ -59,14 +64,6 @@ class MainWindow(QMainWindow):
         self.tray_icon.activated.connect(self.on_tray_icon_activated)
 
         self.copy_text = ''
-
-        self.in_main_window = False
-
-        self.installEventFilter(self)
-        self.icon_window_timer = QTimer()
-        self.icon_window_timer.timeout.connect(
-            self.on_show_icon_window_timeout
-        )
 
         self.old_hook = sys.excepthook
         sys.excepthook = self.catch_exceptions
@@ -88,7 +85,7 @@ class MainWindow(QMainWindow):
         search_label.setText('search: ')
         self.search_input = QLineEdit()
         self.search_input.returnPressed.connect(
-            lambda: self.search_from_hujiang(self.search_input.text())
+            lambda: self.search_word.search(self.search_input.text())
         )
         hbox.addWidget(search_label)
         hbox.addWidget(self.search_input)
@@ -111,13 +108,7 @@ class MainWindow(QMainWindow):
             self.show_window()
             self.search_input.clear()
 
-            words = list_words(self.copy_text)
-            words.extend(search_word_from_dict(self.copy_text))
-
-            if not words or not len(words):
-                self.hujiang.search(self.copy_text)
-            else:
-                self.show_words(words)
+            self.search_word.search(self.copy_text)
 
     def show_words(self, words):
         self.word_list.show_words(words)
@@ -143,7 +134,7 @@ class MainWindow(QMainWindow):
         if self.isVisible():
             self.hide()
         self.icon_window.show()
-        self.icon_window_timer.start(1500)
+        self.icon_window_timer.start(1200)
 
     def copy_to_clipboard(self, text):
         cb = QApplication.clipboard()
