@@ -13,7 +13,14 @@ def search(word):
                     if item.link != "" and item.content == "":
                         link_data = session.query(DictionaryEntry).filter_by(
                             keyword=item.link).all()
-                        result.extend(link_data)
+                        for x in link_data:
+                            result.append({
+                                'source': dictionary['name'],
+                                'data': x
+                            })
                     else:
-                        result.append(item)
+                        result.append({
+                            'source': dictionary['name'],
+                            'data': item
+                        })
     return result

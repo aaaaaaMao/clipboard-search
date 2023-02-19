@@ -52,7 +52,9 @@ class HuJiang():
             bytes_string = resp.readAll()
             result = self.parse(str(bytes_string, 'utf-8'))
 
-            self.search_succeed_signal.emit(result)
+            self.search_succeed_signal.emit(
+                list(map(lambda x: {'source': 'hujiang', 'data': x}, result))
+            )
         else:
             logging.error(resp.errorString())
 

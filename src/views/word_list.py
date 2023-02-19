@@ -61,18 +61,12 @@ class WordListItem(QWidget):
         layout = QHBoxLayout()
         text = ''
 
-        if isinstance(word, JPWordHj):
-            text = QLabel(str(word))
-            check = QCheckBox()
-            if get_by_word_and_kana(word.word, word.pronounces):
-                check.setChecked(True)
-            check.stateChanged.connect(
-                lambda state: self.on_box_checked(state, word)
-            )
-            layout.addWidget(check)
-        elif isinstance(word, JPWord):
-            if word.source == 'hujiang':
-                hj_word = json.loads(word.content)
+        self.source = word['source']
+        data = word['data']
+
+        if isinstance(data, JPWord):
+            if data.source == 'hujiang':
+                hj_word = json.loads(data.content)
                 text = QLabel(str(JPWordHj(
                     hj_word['word'],
                     hj_word['pronounces'],
@@ -80,15 +74,31 @@ class WordListItem(QWidget):
                     hj_word['translation'],
                 )))
             else:
-                text = QLabel(word.content)
+                text = QLabel(data.content)
             check = QCheckBox()
             check.setChecked(True)
             check.stateChanged.connect(
-                lambda state: self.on_box_checked(state, word)
+                lambda state: self.on_box_checked(state, data)
             )
             layout.addWidget(check)
         else:
-            text = QLabel(word.content)
+            word = ''
+            kana = ''
+            if isinstance(data, JPWordHj):
+                text = QLabel(str(data))
+                word = data.word
+                kana = data.pronounces
+            # else:
+            #     text = QLabel(data.content)
+            #     word = data.keyword
+
+                check = QCheckBox()
+                if get_by_word_and_kana(word, kana):
+                    check.setChecked(True)
+                check.stateChanged.connect(
+                    lambda state: self.on_box_checked(state, data)
+                )
+                layout.addWidget(check)
 
         layout.addWidget(text)
         layout.setSizeConstraint(
@@ -96,16 +106,19 @@ class WordListItem(QWidget):
         )
         self.setLayout(layout)
 
-    def on_box_checked(self, state, word):
+    def on_box_checked(self, state, data):
         if state == Qt.Checked:
-            save_word(word.word, word.pronounces, 'hujiang', json.dumps({
-                'word': word.word,
-                'pronounces': word.pronounces,
-                'word_type': word.word_type,
-                'translation': word.translation,
-            }, ensure_ascii=False))
-            logging.info(f'Check: {word.word}')
+            if self.source == 'hujiang':
+                save_word(data.word, data.pronounces, self.source, json.dumps({
+                    'word': data.word,
+                    'pronounces': data.pronounces,
+                    'word_type': data.word_type,
+                    'translation': data.translation,
+                }, ensure_ascii=False))
+                logging.info(f'Check: {data.word}')
+            else:
+                save_word(data.keyword, '', self.source, data.content)
         else:
-            if isinstance(word, JPWord):
-                remove_word_by_id(word.id)
-                logging.info(f'Cancel: {word.word}')
+            if isinstance(data, JPWord):
+                remove_word_by_id(data.id)
+                logging.info(f'Cancel: {data.word}')

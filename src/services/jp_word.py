@@ -30,12 +30,14 @@ def remove_word_by_id(id):
 
 def list_words(word):
     with Session() as session:
-        return session.query(JPWord).filter(
+        result = session.query(JPWord).filter(
             or_(
                 JPWord.word == word,
                 JPWord.kana == word
             )
         ).all()
+
+        return list(map(lambda x: {'source': 'favorites', 'data': x}, result))
 
 
 def get_by_word_and_kana(word, kana):
