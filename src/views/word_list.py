@@ -82,23 +82,17 @@ class WordListItem(QWidget):
             )
             layout.addWidget(check)
         else:
-            word = ''
-            kana = ''
+
             if isinstance(data, JPWordHj):
                 text = QLabel(str(data))
-                word = data.word
-                kana = data.pronounces
-            # else:
-            #     text = QLabel(data.content)
-            #     word = data.keyword
+            else:
+                text = QLabel(data.content)
 
-                check = QCheckBox()
-                if get_by_word_and_kana(word, kana):
-                    check.setChecked(True)
-                check.stateChanged.connect(
-                    lambda state: self.on_box_checked(state, data)
-                )
-                layout.addWidget(check)
+            check = QCheckBox()
+            check.stateChanged.connect(
+                lambda state: self.on_box_checked(state, data)
+            )
+            layout.addWidget(check)
 
         layout.addWidget(text)
         layout.setSizeConstraint(
