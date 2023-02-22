@@ -1,4 +1,13 @@
 {
+    "main_window": {
+        "minimun_size": [
+            400,
+            480
+        ]
+    },
+    "mouse_monitor": {
+        "debug": false
+    },
     "hujiang": {
         "req_headers": {
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -17,5 +26,19 @@
             "Referrer-Policy": "no-referrer-when-downgrade"
         },
         "req_url": "https://dict.hjenglish.com/jp/jc/"
-    }
+    },
+    "dictionaries": [
+        {
+            "name": "新時代日漢辭典",
+            "search": true
+        },
+        {
+            "name": "三合一日文詞典",
+            "search": false
+        },
+        {
+            "name": "プログレッシブ和英中辞典_v4",
+            "search": true
+        }
+    ]
 }

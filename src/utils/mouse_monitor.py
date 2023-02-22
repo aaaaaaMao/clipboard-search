@@ -1,3 +1,5 @@
+from src import config, logging
+
 import time
 import threading
 from pynput import mouse
@@ -8,16 +10,15 @@ import win32con
 
 class MouseMonitor:
 
-    _press_time = 0
-    _press_double_state = False
-    _move = (0, 0)
-    _debug = False
-    _content = None
+    def __init__(self, signal=None):
 
-    def __init__(self, debug=False, signal=None):
-
-        self._debug = debug
+        self._debug = config['mouse_monitor']['debug']
         self._signal = signal
+
+        self._press_time = 0
+        self._press_double_state = False
+        self._move = (0, 0)
+        self._content = None
 
         self.listener = mouse.Listener(
             on_move=self.on_move,
@@ -41,11 +42,7 @@ class MouseMonitor:
     def on_pressed(self, x, y):
         if self._press_double_state:
             # double click
-            if not self.check_not_time_out(
-                    self._press_time,
-                    time.time(),
-                    0.4
-            ):
+            if self.is_timeout(time.time(), 0.4):
                 self.log('double1 click timeout and reset')
                 self.reset()
                 self._press_time = time.time()
@@ -56,12 +53,8 @@ class MouseMonitor:
     def on_released(self, x, y):
         if self._press_double_state:
           # double click
-            if self.check_not_time_out(
-                    self._press_time,
-                    time.time(),
-                    0.8
-            ):
-                content = self.get_copy()
+            if not self.is_timeout(time.time(), 0.6):
+                content = self.read_clipboard()
                 self.log(f'double click: {content}')
                 self.on_selected(content)
                 self._press_double_state = False
@@ -69,20 +62,13 @@ class MouseMonitor:
                 self.log('double2 click timeout and reset')
                 self.reset()
         else:
-            if self.check_not_time_out(
-                    self._press_time,
-                    time.time()
-            ):
+            if not self.is_timeout(time.time()):
                 self.log('maybe double click')
                 self._press_double_state = True
                 threading.Timer(0.5, self.timeout_handler).start()
-            elif not self.check_not_time_out(
-                    self._press_time,
-                    time.time(),
-                    1
-            ):
+            elif self.is_timeout(time.time(), 0.6):
                 if self._move != (0, 0):
-                    content = self.get_copy()
+                    content = self.read_clipboard()
                     self.log(f'selected: {content}')
                     self.on_selected(content)
                     self.reset()
@@ -90,7 +76,7 @@ class MouseMonitor:
                 self.log('reset state')
                 self.reset()
 
-    def get_copy(self):
+    def read_clipboard(self):
 
         def trigger_copy():
             key = Controller()
@@ -122,8 +108,8 @@ class MouseMonitor:
         self.reset()
         self.log('timeout to reset state')
 
-    def check_not_time_out(self, old, new, delta=0.2):
-        return new - old < delta
+    def is_timeout(self, now, delta=0.2):
+        return now - self._press_time > delta
 
     def on_selected(self, content):
         self.log(f'select:\n{content}')
@@ -133,4 +119,4 @@ class MouseMonitor:
     def log(self, message):
         if not self._debug:
             return
-        print(message)
+        logging.info(message)
