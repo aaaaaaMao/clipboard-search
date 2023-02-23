@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 
 from src import logging, word_list_style_sheet as style_sheet
-from src.services.jp_word import save_word, get_by_word_and_kana, remove_word_by_id
+from src.services.jp_word import save_word, remove_word_by_id
 from src.models.jp_word import JPWord
 from src.services.hujiang import JPWordHj
 
@@ -26,7 +26,8 @@ class WordList(QListWidget):
     def init_ui(self):
         self.addItem('Waiting copy')
         self.itemDoubleClicked.connect(self.on_item_double_clicked)
-        self.setStyleSheet(style_sheet)
+        if style_sheet:
+            self.setStyleSheet(style_sheet)
 
     def on_item_double_clicked(self, item: QListWidgetItem):
         widget = self.itemWidget(item)

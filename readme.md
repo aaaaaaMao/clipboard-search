@@ -1,39 +1,23 @@
-Read text from clipboard and search it. 
+划词查词
 
-Search Japanese word from [hujiang](https://dict.hjenglish.com/jp/jc/)
+1. 从配置好的字典数据中查找日语单词
+2. 从 [沪江](https://dict.hjenglish.com/jp/jc/) 查找日语单词
+
+### Usage:
+
+1. 长安左键选中文本后，点击出现的弹窗进行查词
+2. 双击左键选中文本后，点击出现的弹窗进行查词
+
+### Cautions:
+
+- 选中文本出现图标时，所选的文本已经复制到剪切板了
+- 由于会发请求查单词，请注意复制的文本数据
+
+### Build:
 
 ```
 python >= 3.10.4
 ```
-
-### Usage:
-
-- CTRL+C  
-copy text to clipboard
-
-- CTRL+Q  
-search word from hujiang and copy result to clipboard
-
-- Double click list item  
-copy item to clipboard
-
-- ALT+SPACE  
-show window
-
-### Cautions:
-
-- Don't copy private data and search it! 
-
-### Result format:
-```
-一日(ついたち)
-【名词】
----
-一号，一日。
-
-```
-
-### Build:
 
 - Windows
 ```ps1
@@ -43,5 +27,4 @@ pip install -r requirements.txt
 
 ---
 
-- Ref:
-- System tray icon: <a href="https://www.flaticon.com/free-icons/battery" title="battery icons">Battery icons created by Freepik - Flaticon</a>
+- 图标来源: <a href="https://www.flaticon.com/free-icons/battery" title="battery icons">Battery icons created by Freepik - Flaticon</a>

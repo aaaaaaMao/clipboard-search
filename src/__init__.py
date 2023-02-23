@@ -31,8 +31,11 @@ def init():
         os.mkdir(data_dir)
 
     global word_list_style_sheet
-    with open(os.path.join(os.getcwd(), './data/dictionary/db/PJE4.css'), 'r', encoding='utf8') as f:
-        word_list_style_sheet = f.read()
+    style_sheet_file = os.path.join(
+        os.getcwd(), './data/dictionary/db/PJE4.css')
+    if os.path.exists(style_sheet_file):
+        with open(style_sheet_file, 'r', encoding='utf8') as f:
+            word_list_style_sheet = f.read()
 
 
 init()
