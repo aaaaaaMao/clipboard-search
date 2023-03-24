@@ -10,7 +10,8 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QSystemTrayIcon,
-    QLineEdit
+    QLineEdit,
+    QListWidget
 )
 from PyQt5.QtCore import QSize, Qt, QObject, QThread, pyqtSignal, QEvent, QTimer
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
@@ -23,6 +24,7 @@ from src.views.word_list import WordList
 
 from src.services.mouse_monitor_worker import MouseMonitorWorker
 from src.services.search_word import SearchWord
+from src.services.fugashi_tagger import tag
 
 
 class MainWindow(QMainWindow):
@@ -87,9 +89,17 @@ class MainWindow(QMainWindow):
         self.search_input.returnPressed.connect(
             lambda: self.search_word.search(self.search_input.text())
         )
+
         hbox.addWidget(search_label)
         hbox.addWidget(self.search_input)
         vbox.addLayout(hbox)
+
+        self.token_list = QListWidget()
+        self.token_list.setMaximumHeight(75)
+        self.token_list.itemDoubleClicked.connect(
+            lambda item: self.search_word.search(item.text())
+        )
+        vbox.addWidget(self.token_list)
 
         self.word_list = WordList()
         vbox.addWidget(self.word_list)
@@ -107,8 +117,15 @@ class MainWindow(QMainWindow):
             logging.info(f'Search: {self.copy_text}')
             self.show_window()
             self.search_input.clear()
+            self.token_list.clear()
 
-            self.search_word.search(self.copy_text)
+            tokens = [self.copy_text]
+            for item in tag(self.copy_text):
+                word_orth_base = item['orthBase']
+                self.token_list.addItem(word_orth_base)
+                tokens.append(word_orth_base)
+
+            self.search_word.search(tokens[0])
 
     def show_words(self, words):
         self.word_list.show_words(words)

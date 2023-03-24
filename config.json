@@ -2,7 +2,7 @@
     "main_window": {
         "minimun_size": [
             400,
-            480
+            600
         ]
     },
     "mouse_monitor": {
