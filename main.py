@@ -11,7 +11,6 @@ from PyQt5.QtWidgets import (
     QLabel,
     QSystemTrayIcon,
     QLineEdit,
-    QListWidget
 )
 from PyQt5.QtCore import QSize, Qt, QObject, QThread, pyqtSignal, QEvent, QTimer
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
@@ -21,10 +20,10 @@ from src import logging, config
 from src.views.float_icon_window import FloatIconWindow
 from src.views.tray_icon import TrayIcon
 from src.views.word_list import WordList
+from src.views.token_list import TokenList
 
 from src.services.mouse_monitor_worker import MouseMonitorWorker
 from src.services.search_word import SearchWord
-from src.services.fugashi_tagger import tag
 
 
 class MainWindow(QMainWindow):
@@ -94,8 +93,7 @@ class MainWindow(QMainWindow):
         hbox.addWidget(self.search_input)
         vbox.addLayout(hbox)
 
-        self.token_list = QListWidget()
-        self.token_list.setMaximumHeight(75)
+        self.token_list = TokenList()
         self.token_list.itemDoubleClicked.connect(
             lambda item: self.search_word.search(item.text())
         )
@@ -119,11 +117,9 @@ class MainWindow(QMainWindow):
             self.search_input.clear()
             self.token_list.clear()
 
-            tokens = [self.copy_text]
-            for item in tag(self.copy_text):
-                word_orth_base = item['orthBase']
-                self.token_list.addItem(word_orth_base)
-                tokens.append(word_orth_base)
+            tokens = self.token_list.tokenizer(self.copy_text)
+            if len(tokens) == 0:
+                tokens.append(self.copy_text)
 
             self.search_word.search(tokens[0])
 
