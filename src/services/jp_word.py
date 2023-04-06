@@ -60,7 +60,7 @@ def dump_to_json(file='./data/favorites.json'):
                 'word': item.word,
                 'kana': item.kana,
                 'source': item.source,
-                'content': json.loads(item.content),
+                'content': item.content,
                 'created_time': item.created_time.isoformat(),
             })
         with open(file, 'w', encoding='utf8') as f:
