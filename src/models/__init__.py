@@ -9,8 +9,6 @@ from src import config
 favorites_engine = create_engine(
     'sqlite:///data/favorites.db?check_same_thread=False')
 
-dictionary_engines = []
-
 
 def load_dictionaries(filepath='./data/dictionary'):
     if not os.path.exists(filepath):
@@ -22,6 +20,7 @@ def load_dictionaries(filepath='./data/dictionary'):
 
     # for file in os.listdir(db_dir):
     #     (filename, ext) = os.path.splitext(file)
+    result = []
     for item in config['dictionaries']:
         filename = item['name']
         if item['search'] and os.path.exists(f'{db_dir}/{filename}.db'):
@@ -30,9 +29,10 @@ def load_dictionaries(filepath='./data/dictionary'):
                 'engine': create_engine(f'sqlite:///{db_dir}/{filename}.db?check_same_thread=False')
             }
             item['Session'] = sessionmaker(bind=item['engine'])
-            dictionary_engines.append(item)
+            result.append(item)
         else:
             pass
+    return result
 
 
-load_dictionaries()
+dictionary_engines = load_dictionaries()
