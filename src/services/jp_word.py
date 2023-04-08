@@ -8,12 +8,13 @@ from src.models.jp_word import JPWord
 Session = sessionmaker(bind=favorites_engine)
 
 
-def save_word(word, kana, source, content):
+def save_word(word, kana, source, content, source_id=None):
     with Session() as session:
         word = JPWord(
             word=word,
             kana=kana,
             source=source,
+            source_id=source_id,
             content=content,
             created_time=datetime.datetime.now()
         )

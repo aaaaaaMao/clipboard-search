@@ -112,7 +112,8 @@ class WordListItem(QWidget):
                 }, ensure_ascii=False))
                 logging.info(f'Check: {data.word}')
             else:
-                save_word(data.keyword, '', self.source, data.content)
+                save_word(data.keyword, '', self.source,
+                          data.content, data.id)
         else:
             if isinstance(data, JPWord):
                 remove_word_by_id(data.id)
