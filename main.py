@@ -24,6 +24,7 @@ from src.views.token_list import TokenList
 
 from src.services.mouse_monitor_worker import MouseMonitorWorker
 from src.services.search_word import SearchWord
+from src.utils import utils
 
 
 class MainWindow(QMainWindow):
@@ -110,7 +111,7 @@ class MainWindow(QMainWindow):
         self.tray_icon.show()
 
     def search(self):
-        self.copy_text = QApplication.clipboard().text()
+        self.copy_text = utils.trim(QApplication.clipboard().text())
         if self.copy_text:
             logging.info(f'Search: {self.copy_text}')
             self.show_window()

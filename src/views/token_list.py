@@ -13,9 +13,10 @@ class TokenList(QListWidget):
 
     def tokenizer(self, text: str):
         self.clear()
-        tokens = []
+        tokens = set()
         for item in tag(text):
             word_orth_base = item['orthBase']
-            self.addItem(word_orth_base)
-            tokens.append(word_orth_base)
-        return tokens
+            if not word_orth_base in tokens:
+                self.addItem(word_orth_base)
+                tokens.add(word_orth_base)
+        return list(tokens)
