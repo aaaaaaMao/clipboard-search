@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
         self.worker = MouseMonitorWorker()
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
-        self.worker.search.connect(self.show_icon_window)
+        self.worker.search.connect(self.on_copy)
         self.worker.show_window.connect(self.show_window)
 
         self.thread.finished.connect(self.thread.deleteLater)
@@ -111,7 +111,6 @@ class MainWindow(QMainWindow):
         self.tray_icon.show()
 
     def search(self):
-        self.copy_text = utils.trim(QApplication.clipboard().text())
         if self.copy_text:
             logging.info(f'Search: {self.copy_text}')
             self.show_window()
@@ -135,6 +134,10 @@ class MainWindow(QMainWindow):
             if self.icon_window.isVisible():
                 self.icon_window.close()
             self.showNormal()
+
+    def on_copy(self, content):
+        self.copy_text = utils.trim(content)
+        self.show_icon_window()
 
     def show_icon_window(self):
         if self.in_main_window:
@@ -171,6 +174,7 @@ class MainWindow(QMainWindow):
 
     def on_show_icon_window_timeout(self):
         self.icon_window_timer.stop()
+        self.copy_text = ''
         self.icon_window.hide()
 
     def catch_exceptions(self, err_type, err_value, err_traceback):
