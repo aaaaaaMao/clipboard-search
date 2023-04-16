@@ -3,7 +3,7 @@ from src.models import dictionary_engines
 from src.models.dictionary import DictionaryEntry
 
 
-def search(word):
+def search(word: str):
     result = []
     for dictionary in dictionary_engines:
         with dictionary['Session']() as session:

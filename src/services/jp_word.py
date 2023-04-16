@@ -29,7 +29,7 @@ def remove_word_by_id(id):
         session.commit()
 
 
-def list_words(word):
+def list_words(word: str):
     with Session() as session:
         result = session.query(JPWord).filter(
             or_(

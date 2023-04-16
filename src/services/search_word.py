@@ -29,4 +29,6 @@ class SearchWord:
         if not words or not len(words):
             self.hujiang.search(word)
         else:
+            for item in words:
+                item['word'] = word
             self.search_succeed_signal.emit(words)

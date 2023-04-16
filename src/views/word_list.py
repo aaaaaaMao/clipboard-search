@@ -16,6 +16,7 @@ from src import logging, word_list_style_sheet as style_sheet
 from src.services.jp_word import save_word, remove_word_by_id
 from src.models.jp_word import JPWord
 from src.services.hujiang import JPWordHj
+from src.utils import utils
 
 
 class WordList(QListWidget):
@@ -62,6 +63,8 @@ class WordListItem(QWidget):
         layout = QHBoxLayout()
         text = ''
 
+        if 'word' in word:
+            self.word = word['word']
         self.source = word['source']
         data = word['data']
 
@@ -112,7 +115,10 @@ class WordListItem(QWidget):
                 }, ensure_ascii=False))
                 logging.info(f'Check: {data.word}')
             else:
-                save_word(data.keyword, '', self.source,
+                kana = ''
+                if self.source == '新時代日漢辭典':
+                    kana = utils.extract_kana(data.content)
+                save_word(self.word, kana, self.source,
                           data.content, data.id)
         else:
             if isinstance(data, JPWord):
