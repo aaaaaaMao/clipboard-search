@@ -40,7 +40,9 @@ def extract_meanings(content: str):
         meaning_p_list = excf_div.find_all('p', 'meaning')
         for meaning_p in meaning_p_list:
             text = trim(meaning_p.get_text())
-            if re.search('\d+.+', text):
+            if re.search('^\d+', text) and trim(re.sub('^\d+', '', text)) == '':
+                continue
+            else:
                 item['meanings'].append(text.replace('；', '\n'))
         subheadword_p_list = excf_div.find_all('p', 'subheadword')
         for subheadword_p in subheadword_p_list:
