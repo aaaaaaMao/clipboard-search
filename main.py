@@ -118,8 +118,6 @@ class MainWindow(QMainWindow):
             self.token_list.clear()
 
             tokens = self.token_list.tokenizer(self.copy_text)
-            if len(tokens) == 0:
-                tokens.append(self.copy_text)
 
             self.search_word.search(tokens[0])
 

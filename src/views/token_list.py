@@ -21,4 +21,7 @@ class TokenList(QListWidget):
                 dup.add(word_orth_base)
                 self.addItem(word_orth_base)
                 tokens.append(word_orth_base)
+        if len(tokens) == 0:
+            self.addItem(text)
+            tokens.append(text)
         return tokens
