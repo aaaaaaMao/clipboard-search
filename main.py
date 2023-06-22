@@ -3,7 +3,6 @@ import traceback
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (
-    QApplication,
     QMainWindow,
     QWidget,
     QVBoxLayout,
@@ -24,7 +23,6 @@ from src.views.token_list import TokenList
 
 from src.services.mouse_monitor_worker import MouseMonitorWorker
 from src.services.search_word import SearchWord
-from src.utils import utils
 
 
 class MainWindow(QMainWindow):
@@ -57,8 +55,8 @@ class MainWindow(QMainWindow):
         self.worker = MouseMonitorWorker()
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
-        self.worker.search.connect(self.on_copy)
-        self.worker.show_window.connect(self.show_window)
+        self.worker.show_icon_window_sig.connect(self.show_icon_window)
+        self.worker.show_search_window_sig.connect(self.show_window)
 
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
@@ -110,7 +108,8 @@ class MainWindow(QMainWindow):
         self.tray_icon = TrayIcon(self.main_icon)
         self.tray_icon.show()
 
-    def search(self):
+    def search(self, text):
+        self.copy_text = text
         if self.copy_text:
             logging.info(f'Search: {self.copy_text}')
             self.show_window()
@@ -133,10 +132,6 @@ class MainWindow(QMainWindow):
                 self.icon_window.close()
             self.showNormal()
 
-    def on_copy(self, content):
-        self.copy_text = utils.trim(content)
-        self.show_icon_window()
-
     def show_icon_window(self):
         if self.in_main_window:
             return
@@ -150,11 +145,6 @@ class MainWindow(QMainWindow):
             self.hide()
         self.icon_window.show()
         self.icon_window_timer.start(1200)
-
-    def copy_to_clipboard(self, text):
-        cb = QApplication.clipboard()
-        cb.clear(mode=cb.Clipboard)
-        cb.setText(text + '\n', mode=cb.Clipboard)
 
     def on_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:

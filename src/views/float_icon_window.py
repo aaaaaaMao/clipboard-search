@@ -2,10 +2,12 @@ from PyQt5.QtWidgets import QWidget, QLabel
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QPixmap
 
+from src.services.clipboard import read_clipboard
+
 
 class FloatIconWindow(QWidget):
 
-    search_signal = pyqtSignal()
+    search_signal = pyqtSignal(str)
 
     def __init__(self, icon: QPixmap):
         super().__init__()
@@ -34,4 +36,6 @@ class FloatIconWindow(QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.search_signal.emit()
+            self.hide()
+            content = read_clipboard()
+            self.search_signal.emit(content)
