@@ -23,8 +23,8 @@ class SearchWord:
             existed.add(utils.trim(w['data'].content))
         for w in search_word_from_dict(word):
             content = utils.trim(w['data'].content)
-            if w['source'] == 'プログレッシブ和英中辞典_v4':
-                w['data'].content = utils.extract_meanings(content)
+            # if w['source'] == 'プログレッシブ和英中辞典_v4':
+            #     w['data'].content = utils.extract_meanings(content)
             if not content in existed:
                 words.append(w)
 

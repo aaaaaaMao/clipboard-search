@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src.services.fugashi_tagger import tag
+from src.utils.utils import kana, invert_kana
 
 
 class TokenList(QListWidget):
@@ -14,14 +15,20 @@ class TokenList(QListWidget):
     def tokenizer(self, text: str):
         self.clear()
         dup = set()
-        tokens = []
-        for item in tag(text):
-            word_orth_base = item['orthBase']
-            if word_orth_base and (not word_orth_base in dup):
-                dup.add(word_orth_base)
-                self.addItem(word_orth_base)
-                tokens.append(word_orth_base)
-        if len(tokens) == 0:
-            self.addItem(text)
-            tokens.append(text)
-        return tokens
+
+        katagan = [x if x not in kana else kana[x] for x in text]
+        hiragana = [x if x not in invert_kana else invert_kana[x]
+                    for x in text]
+
+        tokens = set()
+        for t in [text, ''.join(katagan), ''.join(hiragana)]:
+            for item in tag(t):
+                word_orth_base = item['orthBase']
+                if word_orth_base and (not word_orth_base in dup):
+                    dup.add(word_orth_base)
+                    self.addItem(word_orth_base)
+                    tokens.add(word_orth_base)
+            if len(tokens) == 0:
+                self.addItem(text)
+                tokens.add(text)
+        return list(tokens)
