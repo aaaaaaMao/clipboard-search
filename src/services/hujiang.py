@@ -65,35 +65,50 @@ class HuJiang():
         result = []
         for pane in panes:
             word = pane.find(class_='word-info').h2.get_text()
+
             pronounces_div = pane.find(class_='pronounces')
             pronounces = pronounces_div.find_all('span')[0].get_text()
+            if pronounces:
+                pronounces = re.sub(r'\[|\]', '', pronounces)
+
             simple_div = pane.find(class_='simple')
 
             word_type = ''
-            translation = []
+            translations = []
 
             word_type_h2 = simple_div.find_all('h2')
-            translation_ul = simple_div.find_all('ul')
+            translations_ul = simple_div.find_all('ul')
 
             if word_type_h2 and len(word_type_h2):
                 for i in range(len(word_type_h2)):
                     word_type = ''
-                    translation = []
+                    translations = []
 
                     word_type = word_type_h2[i].get_text()
 
-                    for li in translation_ul[i].find_all('li'):
-                        translation.append(li.get_text())
-                    if len(translation) == 1:
-                        # tran_ = translation[0].replace('；', '；\n')
-                        translation = [re.sub(r'\d+\.\s*', '', translation[0])]
+                    for li in translations_ul[i].find_all('li'):
+                        translations.append(li.get_text())
+                    translations = remove_seq(translations)
+                    # if len(translations) == 1:
+                    #     translations = [
+                    #         re.sub(r'\d+\.\s*', '', translations[0])]
 
-                    pronounces = re.sub(r'\[|\]', '', pronounces)
                     result.append(
-                        JPWordHj(word, pronounces, word_type, translation))
+                        JPWordHj(word, pronounces, word_type, translations))
             else:
-                pronounces = re.sub(r'\[|\]', '', pronounces)
+                if translations_ul and len(translations_ul):
+                    for ul in translations_ul:
+                        for li in ul.find_all('li'):
+                            translations.append(li.get_text())
+                    translations = remove_seq(translations)
+
                 result.append(
-                    JPWordHj(word, pronounces, word_type, translation))
+                    JPWordHj(word, pronounces, word_type, translations))
 
         return result
+
+
+def remove_seq(translations):
+    if len(translations) == 1:
+        return [re.sub(r'\d+\.\s*', '', translations[0])]
+    return translations
