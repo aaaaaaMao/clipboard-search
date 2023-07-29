@@ -20,15 +20,15 @@ class TokenList(QListWidget):
         hiragana = [x if x not in invert_kana else invert_kana[x]
                     for x in text]
 
-        tokens = set()
+        tokens = []
         for t in [text, ''.join(katagan), ''.join(hiragana)]:
             for item in tag(t):
                 word_orth_base = item['orthBase']
-                if word_orth_base and (not word_orth_base in dup):
+                if word_orth_base and (word_orth_base not in dup):
                     dup.add(word_orth_base)
                     self.addItem(word_orth_base)
-                    tokens.add(word_orth_base)
+                    tokens.append(word_orth_base)
             if len(tokens) == 0:
                 self.addItem(text)
-                tokens.add(text)
-        return list(tokens)
+                tokens.append(text)
+        return tokens
