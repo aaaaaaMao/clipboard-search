@@ -1,3 +1,4 @@
+from typing import List
 import re
 from bs4 import BeautifulSoup
 
@@ -68,7 +69,7 @@ kana = {
     'か': 'カ', 'き': 'キ', 'く': 'ク', 'け': 'ケ', 'こ': 'コ',
     'さ': 'サ', 'し': 'シ', 'す': 'ス', 'せ': 'セ', 'そ': 'ソ',
     'た': 'タ', 'ち': 'チ', 'つ': 'ツ', 'て': 'テ', 'と': 'ト',
-    'な': 'ナ', 'に': 'ニ', 'ぬ': 'ウ', 'ね': 'ネ', 'の': 'ノ',
+    'な': 'ナ', 'に': 'ニ', 'ぬ': 'ヌ', 'ね': 'ネ', 'の': 'ノ',
     'は': 'ハ', 'ひ': 'ヒ', 'ふ': 'フ', 'へ': 'ヘ', 'ほ': 'ホ',
     'ま': 'マ', 'み': 'ミ', 'む': 'ム', 'め': 'メ', 'も': 'モ',
     'や': 'ヤ', 'ゆ': 'ユ', 'よ': 'ヨ',
@@ -79,7 +80,7 @@ kana = {
     'が': 'ガ', 'ぎ': 'ギ', 'ぐ': 'グ', 'げ': 'ゲ', 'ご': 'ゴ',
     'ざ': 'ザ', 'じ': 'ジ', 'ず': 'ズ', 'ぜ': 'ゼ', 'ぞ': 'ゾ',
     'だ': 'ダ', 'ぢ': 'ヂ', 'づ': 'ヅ', 'で': 'デ', 'ど': 'ド',
-    'ば': 'バ', 'び': 'ビ', 'ぶ': 'ル', 'べ': 'ベ', 'ぼ': 'ボ',
+    'ば': 'バ', 'び': 'ビ', 'ぶ': 'ブ', 'べ': 'ベ', 'ぼ': 'ボ',
     'ぱ': 'パ', 'ぴ': 'ピ', 'ぷ': 'プ', 'ぺ': 'ペ', 'ぽ': 'ポ',
 
     'ゃ': 'ャ', 'ゅ': 'ュ', 'ょ': 'ョ',
@@ -88,3 +89,22 @@ kana = {
 }
 
 invert_kana = {value: key for key, value in kana.items()}
+
+
+def transform_kana(text: str) -> List[str]:
+    result = [text]
+    katagan = []
+    hiragana = []
+    for c in text:
+        if c not in kana and c not in invert_kana:
+            return result
+        if c in kana:
+            katagan.append(kana[c])
+        if c in invert_kana:
+            hiragana.append(invert_kana[c])
+    if katagan:
+        result.append(''.join(katagan))
+    if hiragana:
+        result.append(''.join(hiragana))
+
+    return result

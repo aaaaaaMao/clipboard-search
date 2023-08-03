@@ -117,8 +117,10 @@ class MainWindow(QMainWindow):
             self.token_list.clear()
 
             tokens = self.token_list.tokenizer(self.copy_text)
-
-            self.search_word.search(tokens[0])
+            if tokens:
+                self.search_word.search(tokens[0])
+            else:
+                self.show_words([])
 
     def show_words(self, words):
         self.word_list.show_words(words)
