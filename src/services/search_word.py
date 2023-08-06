@@ -13,7 +13,7 @@ class SearchWord:
 
         self.hujiang = HuJiang(config, self.search_succeed_signal)
 
-    def search(self, word: str):
+    def search(self, word: str, source=''):
         if not str:
             self.search_succeed_signal.emit([])
 
@@ -28,7 +28,7 @@ class SearchWord:
             if not content in existed:
                 words.append(w)
 
-        if not words or not len(words):
+        if not words or not len(words) or source == 'hujiang':
             self.hujiang.search(word)
         else:
             for item in words:

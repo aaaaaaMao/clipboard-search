@@ -64,6 +64,7 @@ class MainWindow(QMainWindow):
         self.tray_icon.activated.connect(self.on_tray_icon_activated)
 
         self.copy_text = ''
+        self.current_token = ''
 
         self.old_hook = sys.excepthook
         sys.excepthook = self.catch_exceptions
@@ -92,6 +93,17 @@ class MainWindow(QMainWindow):
         hbox.addWidget(self.search_input)
         vbox.addLayout(hbox)
 
+        source_hbox = QHBoxLayout()
+        hujiang_label = QLabel()
+        hujiang_label.setText('hujiang')
+        hujiang_label.mousePressEvent = \
+            lambda _: self.search_word.search(
+                self.current_token, source='hujiang')
+
+        source_hbox.addStretch(1)
+        source_hbox.addWidget(hujiang_label)
+        vbox.addLayout(source_hbox)
+
         self.token_list = TokenList()
         self.token_list.itemDoubleClicked.connect(
             lambda item: self.search_word.search(item.text())
@@ -110,6 +122,7 @@ class MainWindow(QMainWindow):
 
     def search(self, text):
         self.copy_text = text
+        self.current_token = ''
         if self.copy_text:
             logging.info(f'Search: {self.copy_text}')
             self.show_window()
@@ -119,6 +132,7 @@ class MainWindow(QMainWindow):
             tokens = self.token_list.tokenizer(self.copy_text)
             if tokens:
                 self.search_word.search(tokens[0])
+                self.current_token = tokens[0]
             else:
                 self.show_words([])
 
