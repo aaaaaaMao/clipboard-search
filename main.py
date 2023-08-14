@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
 
         self.token_list = TokenList()
         self.token_list.itemDoubleClicked.connect(
-            lambda item: self.search_word.search(item.text())
+            lambda item: self.select_token(item.text())
         )
         vbox.addWidget(self.token_list)
 
@@ -161,6 +161,10 @@ class MainWindow(QMainWindow):
             self.hide()
         self.icon_window.show()
         self.icon_window_timer.start(1200)
+
+    def select_token(self, token: str):
+        self.current_token = token
+        self.search_word.search(token)
 
     def on_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
