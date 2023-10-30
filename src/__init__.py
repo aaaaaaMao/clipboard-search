@@ -32,7 +32,7 @@ def init():
 
     global word_list_style_sheet
     style_sheet_file = os.path.join(
-        os.getcwd(), './data/dictionary/db/PJE4.css')
+        os.getcwd(), './data/dictionary/db/PJE4_2.css')
     if os.path.exists(style_sheet_file):
         with open(style_sheet_file, 'r', encoding='utf8') as f:
             word_list_style_sheet = f.read()

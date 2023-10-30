@@ -27,8 +27,6 @@ class WordList(QListWidget):
     def init_ui(self):
         self.addItem('Waiting copy')
         self.itemDoubleClicked.connect(self.on_item_double_clicked)
-        if style_sheet:
-            self.setStyleSheet(style_sheet)
 
     def on_item_double_clicked(self, item: QListWidgetItem):
         widget = self.itemWidget(item)

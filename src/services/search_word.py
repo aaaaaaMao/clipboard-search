@@ -4,6 +4,7 @@ from src.services.jp_word import list_words
 from src.services.dictionary import search as search_word_from_dict
 from src.services.hujiang import HuJiang
 from src.utils import utils
+from src import word_list_style_sheet as style_sheet
 
 
 class SearchWord:
@@ -23,8 +24,10 @@ class SearchWord:
             existed.add(utils.trim(w['data'].content))
         for w in search_word_from_dict(word):
             content = utils.trim(w['data'].content)
-            # if w['source'] == 'プログレッシブ和英中辞典_v4':
-            #     w['data'].content = utils.extract_meanings(content)
+            if w['source'] == 'プログレッシブ和英中辞典_v4':
+                # w['data'].content = utils.extract_meanings(content)
+                w['data'].content = f'<style>{style_sheet}</style>{content}'
+
             if not content in existed:
                 words.append(w)
 
