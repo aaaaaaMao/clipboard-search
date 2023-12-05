@@ -17,6 +17,7 @@ from PyQt5.QtGui import QIcon, QCursor, QPixmap
 
 from src import logging, config
 from src.views.float_icon_window import FloatIconWindow
+from src.views.edit_window import EditWindow
 from src.views.tray_icon import TrayIcon
 from src.views.word_list import WordList
 from src.views.token_list import TokenList
@@ -45,6 +46,8 @@ class MainWindow(QMainWindow):
         self.icon_window_timer.timeout.connect(
             self.on_show_icon_window_timeout
         )
+
+        self.edit_window = EditWindow()
 
         self.search_succeed_signal.connect(self.show_words)
         self.search_word = SearchWord(config, self.search_succeed_signal)
@@ -99,9 +102,13 @@ class MainWindow(QMainWindow):
         hujiang_label.mousePressEvent = \
             lambda _: self.search_word.search(
                 self.current_token, source='hujiang')
+        new_label = QLabel()
+        new_label.setText('编辑')
+        new_label.mousePressEvent = lambda _: self.show_edit_window()
 
         source_hbox.addStretch(1)
         source_hbox.addWidget(hujiang_label)
+        source_hbox.addWidget(new_label)
         vbox.addLayout(source_hbox)
 
         self.token_list = TokenList()
@@ -193,6 +200,9 @@ class MainWindow(QMainWindow):
         )
         logging.error("".join(traceback_format))
         self.old_hook(err_type, err_value, err_traceback)
+
+    def show_edit_window(self):
+        self.edit_window.show_window()
 
 
 def main():
