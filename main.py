@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
         search_label.setText('search: ')
         self.search_input = QLineEdit()
         self.search_input.returnPressed.connect(
-            lambda: self.search_word.search(self.search_input.text())
+            lambda: self.search(self.search_input.text())
         )
 
         hbox.addWidget(search_label)
@@ -202,7 +202,7 @@ class MainWindow(QMainWindow):
         self.old_hook(err_type, err_value, err_traceback)
 
     def show_edit_window(self):
-        self.edit_window.show_window()
+        self.edit_window.show_window(self.current_token)
 
 
 def main():
