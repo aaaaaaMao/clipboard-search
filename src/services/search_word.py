@@ -21,6 +21,8 @@ class SearchWord:
         existed = set()
         words = list_words(word)
         for w in words:
+            if w['data'].source == '自建':
+                w['data'].content = f'{w["data"].kana}\n---\n{w["data"].content}'
             existed.add(utils.trim(w['data'].content))
         for w in search_word_from_dict(word):
             content = utils.trim(w['data'].content)
