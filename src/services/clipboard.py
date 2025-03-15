@@ -4,6 +4,7 @@ import win32con
 import time
 
 from src.utils import utils
+from src import logging
 
 
 def read_clipboard():
@@ -13,6 +14,7 @@ def read_clipboard():
         with key.pressed(Key.ctrl):
             key.press('c')
             key.release('c')
+
         time.sleep(0.1)
 
     trigger_copy()
@@ -23,6 +25,6 @@ def read_clipboard():
         content = wc.GetClipboardData(win32con.CF_UNICODETEXT)
         wc.CloseClipboard()
     except Exception as e:
-        print(e)
+        logging.error(e)
 
     return utils.trim(content)
