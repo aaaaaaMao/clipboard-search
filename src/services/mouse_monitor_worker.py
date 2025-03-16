@@ -5,12 +5,13 @@ import keyboard
 from pynput import mouse
 
 from src import config, logging
+from src.services.clipboard import read_clipboard
 
 
 class MouseMonitorWorker(QThread):
 
     show_search_window_sig = pyqtSignal()
-    show_icon_window_sig = pyqtSignal()
+    show_icon_window_sig = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -76,7 +77,8 @@ class MouseMonitorWorker(QThread):
         return diff > delta
 
     def show_icon_window(self):
-        self.show_icon_window_sig.emit()
+        content = read_clipboard()
+        self.show_icon_window_sig.emit(content)
 
     def log(self, message):
         if not self._debug:

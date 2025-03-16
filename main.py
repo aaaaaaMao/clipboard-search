@@ -128,7 +128,7 @@ class MainWindow(QMainWindow):
         self.tray_icon.show()
 
     def search(self, text):
-        self.copy_text = text
+        # self.copy_text = text
         self.current_token = ''
         if self.copy_text:
             logging.info(f'Search: {self.copy_text}')
@@ -155,7 +155,7 @@ class MainWindow(QMainWindow):
                 self.icon_window.close()
             self.showNormal()
 
-    def show_icon_window(self):
+    def show_icon_window(self, selectedText):
         if self.in_main_window:
             return
 
@@ -166,6 +166,8 @@ class MainWindow(QMainWindow):
         self.icon_window.move(self.pos_x, self.pos_y)
         if self.isVisible():
             self.hide()
+        
+        self.copy_text = selectedText
         self.icon_window.show()
         self.icon_window_timer.start(1200)
 
