@@ -3,6 +3,8 @@
         "width": 400,
         "height": 600
     },
+    "icon": "battery.ico",
+    "floating_icon": "battery.png",
     "mouse_monitor": {
         "debug": false
     },

@@ -15,7 +15,7 @@ from PyQt5.QtGui import QIcon, QCursor, QPixmap
 
 
 from src import logging, config
-from src.views.float_icon_window import FloatIconWindow
+from src.views.floating_icon import FloatingIcon
 from src.views.edit_window import EditWindow
 from src.views.tray_icon import TrayIcon
 from src.views.word_list import WordList
@@ -38,9 +38,9 @@ class MainWindow(QMainWindow):
         self.pos_x = 10
         self.pos_y = 10
 
-        float_icon = QPixmap('./images/battery.png')
-        self.icon_window = FloatIconWindow(float_icon)
-        self.icon_window.search_signal.connect(self.search)
+        floating_icon_image = QPixmap(config['floating_icon_path'])
+        self.floating_icon = FloatingIcon(floating_icon_image)
+        self.floating_icon.search_signal.connect(self.search)
         self.icon_window_timer = QTimer()
         self.icon_window_timer.timeout.connect(
             self.on_show_icon_window_timeout
@@ -73,7 +73,7 @@ class MainWindow(QMainWindow):
 
     def init_ui(self):
 
-        self.main_icon = QIcon('./images/battery.png')
+        self.main_icon = QIcon(config['icon_path'])
 
         minimun_size = config['main_window']
         self.setMinimumSize(QSize(minimun_size['width'], minimun_size['height']))
@@ -150,8 +150,8 @@ class MainWindow(QMainWindow):
             self.move(self.pos_x + 20, self.pos_y)
 
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
-            if self.icon_window.isVisible():
-                self.icon_window.close()
+            if self.floating_icon.isVisible():
+                self.floating_icon.close()
             self.showNormal()
 
     def show_icon_window(self, selectedText):
@@ -162,12 +162,12 @@ class MainWindow(QMainWindow):
         self.pos_x = pos.x() + 20
         self.pos_y = pos.y() - 20
 
-        self.icon_window.move(self.pos_x, self.pos_y)
+        self.floating_icon.move(self.pos_x, self.pos_y)
         if self.isVisible():
             self.hide()
         
         self.copy_text = selectedText
-        self.icon_window.show()
+        self.floating_icon.show()
         self.icon_window_timer.start(1200)
 
     def select_token(self, token: str):
@@ -191,7 +191,7 @@ class MainWindow(QMainWindow):
     def on_show_icon_window_timeout(self):
         self.icon_window_timer.stop()
         self.copy_text = ''
-        self.icon_window.hide()
+        self.floating_icon.hide()
 
     def catch_exceptions(self, err_type, err_value, err_traceback):
         traceback_format = traceback.format_exception(

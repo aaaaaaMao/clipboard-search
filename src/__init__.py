@@ -11,23 +11,19 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-config = ConfigManager().config
+config_manager = ConfigManager()
+config = config_manager.config
 
 word_list_style_sheet = ''
 
-def init():
-    cwd = os.getcwd()
-    data_dir = os.path.join(cwd, './data')
+cwd = os.getcwd()
+data_dir = os.path.join(cwd, './data')
 
-    if not os.path.exists(data_dir):
-        os.mkdir(data_dir)
+if not os.path.exists(data_dir):
+    os.mkdir(data_dir)
 
-    global word_list_style_sheet
-    style_sheet_file = os.path.join(
-        os.getcwd(), './data/dictionary/db/PJE4_2.css')
-    if os.path.exists(style_sheet_file):
-        with open(style_sheet_file, 'r', encoding='utf8') as f:
-            word_list_style_sheet = f.read()
-
-
-init()
+style_sheet_file = os.path.join(
+    os.getcwd(), './data/dictionary/db/PJE4_2.css')
+if os.path.exists(style_sheet_file):
+    with open(style_sheet_file, 'r', encoding='utf8') as f:
+        word_list_style_sheet = f.read()

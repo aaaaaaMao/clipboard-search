@@ -5,12 +5,13 @@ from PyQt5.QtGui import QPixmap
 from src.services.clipboard import read_clipboard
 
 
-class FloatIconWindow(QWidget):
+class FloatingIcon(QWidget):
 
     search_signal = pyqtSignal(str)
 
     def __init__(self, icon: QPixmap):
         super().__init__()
+        
         self.icon = icon
         self.init_ui()
 
