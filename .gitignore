@@ -2,11 +2,13 @@ venv
 dist
 build
 __pycache__
-data
+.vscode
 
 main.spec
 *.log
 *.db
-*.json
-!config.json
 build.local.ps1
+ 
+data
+resources/dictionaries/
+configs/config.local.json

@@ -75,8 +75,8 @@ class MainWindow(QMainWindow):
 
         self.main_icon = QIcon('./images/battery.png')
 
-        minimun_size = config['main_window']['minimun_size']
-        self.setMinimumSize(QSize(minimun_size[0], minimun_size[1]))
+        minimun_size = config['main_window']
+        self.setMinimumSize(QSize(minimun_size['width'], minimun_size['height']))
         self.setWindowTitle("Clipboard search")
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setWindowIcon(self.main_icon)
