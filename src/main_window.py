@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
     QSystemTrayIcon,
     QLineEdit,
 )
-from PyQt5.QtCore import QSize, Qt, QObject, QThread, pyqtSignal, QEvent, QTimer
+from PyQt5.QtCore import QSize, Qt, QObject, QThread, pyqtSignal, QEvent, QPoint
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
 
 
@@ -35,16 +35,11 @@ class MainWindow(QMainWindow):
         self.in_main_window = False
         self.installEventFilter(self)
 
-        self.pos_x = 10
-        self.pos_y = 10
+        self.position = QPoint(10, 10)
 
         floating_icon_image = QPixmap(config['floating_icon_path'])
         self.floating_icon = FloatingIcon(floating_icon_image)
         self.floating_icon.search_signal.connect(self.search)
-        self.icon_window_timer = QTimer()
-        self.icon_window_timer.timeout.connect(
-            self.on_show_icon_window_timeout
-        )
 
         self.edit_window = EditWindow()
 
@@ -57,7 +52,7 @@ class MainWindow(QMainWindow):
         self.worker = MouseMonitorWorker()
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
-        self.worker.show_icon_window_sig.connect(self.show_icon_window)
+        self.worker.show_icon_window_sig.connect(self.show_floating_icon)
         self.worker.show_search_window_sig.connect(self.show_window)
 
         self.thread.finished.connect(self.thread.deleteLater)
@@ -126,8 +121,7 @@ class MainWindow(QMainWindow):
         self.tray_icon = TrayIcon(self.main_icon)
         self.tray_icon.show()
 
-    def search(self, text):
-        # self.copy_text = text
+    def search(self):
         self.current_token = ''
         if self.copy_text:
             logging.info(f'Search: {self.copy_text}')
@@ -147,28 +141,24 @@ class MainWindow(QMainWindow):
 
     def show_window(self):
         if (self.isMinimized() or not self.isVisible()) and self.copy_text:
-            self.move(self.pos_x + 20, self.pos_y)
+            self.move(self.position.x() + 20, self.position.y())
 
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
             if self.floating_icon.isVisible():
                 self.floating_icon.close()
             self.showNormal()
 
-    def show_icon_window(self, selectedText):
+    def show_floating_icon(self, selectedText):
         if self.in_main_window:
             return
+        
+        self.position = QCursor().pos() + QPoint(20, -20)
 
-        pos = QCursor().pos()
-        self.pos_x = pos.x() + 20
-        self.pos_y = pos.y() - 20
-
-        self.floating_icon.move(self.pos_x, self.pos_y)
         if self.isVisible():
             self.hide()
         
         self.copy_text = selectedText
-        self.floating_icon.show()
-        self.icon_window_timer.start(1200)
+        self.floating_icon.show(self.position)
 
     def select_token(self, token: str):
         self.current_token = token
@@ -187,11 +177,6 @@ class MainWindow(QMainWindow):
             if event.type() == QEvent.WindowActivate:
                 self.in_main_window = True
         return super().eventFilter(source, event)
-
-    def on_show_icon_window_timeout(self):
-        self.icon_window_timer.stop()
-        self.copy_text = ''
-        self.floating_icon.hide()
 
     def catch_exceptions(self, err_type, err_value, err_traceback):
         traceback_format = traceback.format_exception(

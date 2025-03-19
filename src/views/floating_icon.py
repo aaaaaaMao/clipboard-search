@@ -1,19 +1,22 @@
 from PyQt5.QtWidgets import QWidget, QLabel
-from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtCore import pyqtSignal, Qt, QPoint, QTimer
 from PyQt5.QtGui import QPixmap
-
-from src.services.clipboard import read_clipboard
 
 
 class FloatingIcon(QWidget):
 
-    search_signal = pyqtSignal(str)
+    search_signal = pyqtSignal()
 
     def __init__(self, icon: QPixmap):
         super().__init__()
-        
+
         self.icon = icon
         self.init_ui()
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(
+            self.on_show_timeout
+        )
 
     def init_ui(self):
 
@@ -38,5 +41,14 @@ class FloatingIcon(QWidget):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.hide()
-            content = read_clipboard()
-            self.search_signal.emit(content)
+            self.search_signal.emit()
+
+    def show(self, position: QPoint):
+        self.move(position)
+        self.timer.start(1200)
+        
+        super().show()
+
+    def on_show_timeout(self):
+        self.timer.stop()
+        self.hide()
