@@ -5,10 +5,10 @@ __pycache__
 .vscode
 
 main.spec
-*.log
 *.db
 build.local.ps1
  
 data
 resources/dictionaries/
 configs/config.local.json
+logs
