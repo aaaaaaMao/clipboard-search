@@ -4,7 +4,7 @@ import time
 import keyboard
 from pynput import mouse
 
-from src import config, logging
+from src import config_manager, logging
 from src.services.clipboard import read_clipboard
 
 
@@ -16,7 +16,7 @@ class MouseMonitorWorker(QThread):
     def __init__(self):
         super().__init__()
 
-        self._debug = config['mouse_monitor']['debug']
+        self._debug = config_manager.get('env') == "debug"
 
         self._click_time = 0
         self._double_clicked = False

@@ -14,7 +14,7 @@ from PyQt5.QtCore import QSize, Qt, QObject, QThread, pyqtSignal, QEvent, QPoint
 from PyQt5.QtGui import QIcon, QCursor, QPixmap
 
 
-from src import logging, config
+from src import logging, config_manager
 from src.views.floating_icon import FloatingIcon
 from src.views.edit_window import EditWindow
 from src.views.tray_icon import TrayIcon
@@ -37,14 +37,14 @@ class MainWindow(QMainWindow):
 
         self.position = QPoint(10, 10)
 
-        floating_icon_image = QPixmap(config['floating_icon_path'])
+        floating_icon_image = QPixmap(config_manager.get('floating_icon_path'))
         self.floating_icon = FloatingIcon(floating_icon_image)
         self.floating_icon.search_signal.connect(self.search)
 
         self.edit_window = EditWindow()
 
         self.search_succeed_signal.connect(self.show_words)
-        self.search_word = SearchWord(config, self.search_succeed_signal)
+        self.search_word = SearchWord(config_manager.config, self.search_succeed_signal)
 
         self.init_ui()
 
@@ -68,9 +68,9 @@ class MainWindow(QMainWindow):
 
     def init_ui(self):
 
-        self.main_icon = QIcon(config['icon_path'])
+        self.main_icon = QIcon(config_manager.get('icon_path'))
 
-        minimun_size = config['main_window']
+        minimun_size = config_manager.get('main_window')
         self.setMinimumSize(QSize(minimun_size['width'], minimun_size['height']))
         self.setWindowTitle("Clipboard search")
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
@@ -124,7 +124,9 @@ class MainWindow(QMainWindow):
     def search(self):
         self.current_token = ''
         if self.copy_text:
-            logging.info(f'Search: {self.copy_text}')
+            if config_manager.in_debug():
+                logging.info(f'Search: {self.copy_text}')
+
             self.show_window()
             self.search_input.clear()
             self.token_list.clear()

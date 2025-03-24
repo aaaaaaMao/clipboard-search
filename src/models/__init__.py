@@ -3,7 +3,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src import config
+from src import config_manager
 
 
 favorites_engine = create_engine(
@@ -21,7 +21,7 @@ def load_dictionaries(filepath='./data/dictionary'):
     # for file in os.listdir(db_dir):
     #     (filename, ext) = os.path.splitext(file)
     result = []
-    for item in config['dictionaries']:
+    for item in config_manager.config['dictionaries']:
         filename = item['name']
         if item['search'] and os.path.exists(f'{db_dir}/{filename}.db'):
             item = {

@@ -33,7 +33,7 @@ class SearchWord:
             if not content in existed:
                 words.append(w)
 
-        if not words or not len(words) or source == 'hujiang':
+        if source == 'hujiang':
             self.hujiang.search(word)
         else:
             for item in words:

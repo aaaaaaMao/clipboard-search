@@ -26,7 +26,6 @@ logging.basicConfig(
 )
 
 config_manager = ConfigManager()
-config = config_manager.config
 
 word_list_style_sheet = ''
 
