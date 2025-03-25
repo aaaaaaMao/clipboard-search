@@ -37,14 +37,13 @@ class MainWindow(QMainWindow):
 
         self.position = QPoint(10, 10)
 
-        floating_icon_image = QPixmap(config_manager.get('floating_icon_path'))
-        self.floating_icon = FloatingIcon(floating_icon_image)
+        self.floating_icon = FloatingIcon()
         self.floating_icon.search_signal.connect(self.search)
 
         self.edit_window = EditWindow()
 
         self.search_succeed_signal.connect(self.show_words)
-        self.search_word = SearchWord(config_manager.config, self.search_succeed_signal)
+        self.search_word = SearchWord(self.search_succeed_signal)
 
         self.init_ui()
 
@@ -68,7 +67,7 @@ class MainWindow(QMainWindow):
 
     def init_ui(self):
 
-        self.main_icon = QIcon(config_manager.get('icon_path'))
+        self.main_icon = QIcon(config_manager.get_icon_path('icon'))
 
         minimun_size = config_manager.get('main_window')
         self.setMinimumSize(QSize(minimun_size['width'], minimun_size['height']))

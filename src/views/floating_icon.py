@@ -2,15 +2,17 @@ from PyQt5.QtWidgets import QWidget, QLabel
 from PyQt5.QtCore import pyqtSignal, Qt, QPoint, QTimer
 from PyQt5.QtGui import QPixmap
 
+from src import config_manager
+
 
 class FloatingIcon(QWidget):
 
     search_signal = pyqtSignal()
 
-    def __init__(self, icon: QPixmap):
+    def __init__(self):
         super().__init__()
 
-        self.icon = icon
+        self.icon = QPixmap(config_manager.get_icon_path('floating_icon'))
         self.init_ui()
 
         self.timer = QTimer()

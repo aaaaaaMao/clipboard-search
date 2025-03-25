@@ -4,14 +4,16 @@ import json
 class ConfigManager:
 
     def __init__(self):
+        self.cwd = os.getcwd()
+
         self.config = {}
+        self._style_sheet_cache = {}
+
         self.load_config()
 
     def load_config(self):
-        cwd = os.getcwd()
-
         for file_name in ['config.default.json', 'config.local.json']:
-            file_path = os.path.join(cwd, 'configs', file_name)
+            file_path = os.path.join(self.cwd, 'configs', file_name)
             if os.path.exists(file_path):
                 with open(file_path, 'r', encoding='utf8') as f:
                     try:
@@ -20,10 +22,8 @@ class ConfigManager:
                             self.config.update(config)
                     except Exception as e:
                         pass
-        
-        for field in ['icon', 'floating_icon']:
-            if self.config[field]:
-                self.config[f'{field}_path'] = os.path.join(cwd, 'resources/images', self.config[field])
+
+        self._cache_dictionary_style_sheet()
 
     def get(self, key: str, default=None):
         """获取配置项，支持嵌套键使用点号分隔，如 'window.width'"""
@@ -47,4 +47,26 @@ class ConfigManager:
         config[keys[-1]] = value
 
     def in_debug(self):
-        return self.get('mode') == 'debug'
+        return self.get('env') == 'debug'
+    
+    def get_icon_path(self, icon_name: str):
+        if not self.get(icon_name):
+            return None
+        return os.path.join(self.cwd, 'resources/images', self.get(icon_name))
+    
+    def list_dictionaries(self):
+        return self.get('dictionaries')
+    
+    def get_dictionary_path(self, dictionary_name: str, ext='.db'):
+        return os.path.join(self.cwd, 'resources/dictionaries', f'{dictionary_name}{ext}')
+    
+    def _cache_dictionary_style_sheet(self):
+        for item in self.list_dictionaries():
+            if item.get('search') and item.get('style_sheet'):
+                file_path = os.path.join(self.cwd, 'resources/dictionaries', item['style_sheet'])
+                if os.path.exists(file_path):
+                    with open(file_path, 'r', encoding='utf8') as f:
+                        self._style_sheet_cache[item['name']] = f.read()
+
+    def get_dictionary_style_sheet(self, dictionary_name: str):
+        return self._style_sheet_cache.get(dictionary_name)
