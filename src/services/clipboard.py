@@ -26,5 +26,7 @@ def read_clipboard():
         wc.CloseClipboard()
     except Exception as e:
         logging.error(e)
+        wc.EmptyClipboard()
+        wc.CloseClipboard()
 
     return utils.trim(content)
