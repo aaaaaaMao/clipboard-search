@@ -6,7 +6,9 @@
     },
     "icon": "battery.ico",
     "floating_icon": "battery.png",
-    "hujiang": {},
+    "hujiang": {
+        "enabled": false
+    },
     "dictionaries": [
         {
             "name": "新時代日漢辭典",

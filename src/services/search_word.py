@@ -13,7 +13,8 @@ class SearchWord:
     def __init__(self, search_succeed_signal: pyqtSignal):
         self.search_succeed_signal = search_succeed_signal
 
-        self.hujiang = HuJiang(config_manager.config, self.search_succeed_signal)
+        if config_manager.hujiang_enabled():
+            self.hujiang = HuJiang(config_manager.config, self.search_succeed_signal)
 
     def search(self, word: str, source=''):
         if not str:
@@ -35,7 +36,7 @@ class SearchWord:
             if not content in existed:
                 words.append(w)
 
-        if source == 'hujiang':
+        if source == 'hujiang' and self.hujiang:
             self.hujiang.search(word)
         else:
             for item in words:

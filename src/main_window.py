@@ -90,18 +90,19 @@ class MainWindow(QMainWindow):
         vbox.addLayout(hbox)
 
         source_hbox = QHBoxLayout()
-        hujiang_label = QLabel()
-        hujiang_label.setText('hujiang')
-        hujiang_label.mousePressEvent = \
-            lambda _: self.search_word.search(
-                self.current_token, source='hujiang')
-        new_label = QLabel()
-        new_label.setText('编辑')
-        new_label.mousePressEvent = lambda _: self.show_edit_window()
-
         source_hbox.addStretch(1)
-        source_hbox.addWidget(hujiang_label)
+
+        if config_manager.hujiang_enabled():
+            hujiang_label = QLabel('hujiang')
+            hujiang_label.mousePressEvent = \
+                lambda _: self.search_word.search(
+                    self.current_token, source='hujiang')
+            source_hbox.addWidget(hujiang_label)
+
+        new_label = QLabel('编辑')
+        new_label.mousePressEvent = lambda _: self.show_edit_window()
         source_hbox.addWidget(new_label)
+
         vbox.addLayout(source_hbox)
 
         self.token_list = TokenList()
@@ -142,7 +143,7 @@ class MainWindow(QMainWindow):
 
     def show_window(self):
         if (self.isMinimized() or not self.isVisible()) and self.copy_text:
-            self.move(self.position.x() + 20, self.position.y())
+            self.move(self.position.x() + 20, self.position.y() - 100)
 
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
             if self.floating_icon.isVisible():

@@ -50,7 +50,7 @@ class MouseMonitorWorker(QThread):
         if self._double_clicked:
             if not self.is_timeout(time.time(), 0.6):
                 self.log(f'double click')
-                self.show_icon_window()
+                # self.show_icon_window()
                 self.reset()
             else:
                 self.log('double2 click timeout and reset')

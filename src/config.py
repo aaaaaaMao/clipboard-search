@@ -70,3 +70,7 @@ class ConfigManager:
 
     def get_dictionary_style_sheet(self, dictionary_name: str):
         return self._style_sheet_cache.get(dictionary_name)
+    
+    def hujiang_enabled(self):
+        return self.get('hujiang.enabled') and self.get('hujiang.req_url') \
+                and self.get('hujiang.req_headers')

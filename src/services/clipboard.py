@@ -17,16 +17,24 @@ def read_clipboard():
 
         time.sleep(0.1)
 
+    def close_clipboard():
+        try:
+            wc.EmptyClipboard()
+            wc.CloseClipboard()
+        except Exception as e:
+            logging.error(e)
+
     trigger_copy()
 
     content = ''
     try:
         wc.OpenClipboard()
         content = wc.GetClipboardData(win32con.CF_UNICODETEXT)
-        wc.CloseClipboard()
+        close_clipboard()
     except Exception as e:
         logging.error(e)
-        wc.EmptyClipboard()
-        wc.CloseClipboard()
+        close_clipboard()
+
+
 
     return utils.trim(content)
