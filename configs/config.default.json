@@ -23,5 +23,12 @@
             "search": true,
             "style_sheet": "PJE4_2.css"
         }
+    ],
+    "ai": [
+        {
+            "provider": "deepseek",
+            "base_url": "https://api.deepseek.com",
+            "api_key": ""
+        }
     ]
 }

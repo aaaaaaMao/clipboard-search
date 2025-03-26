@@ -11,18 +11,20 @@ from PyQt5.QtWidgets import (
     QLineEdit,
 )
 from PyQt5.QtCore import QSize, Qt, QObject, QThread, pyqtSignal, QEvent, QPoint
-from PyQt5.QtGui import QIcon, QCursor, QPixmap
+from PyQt5.QtGui import QIcon, QCursor
 
 
 from src import logging, config_manager
 from src.views.floating_icon import FloatingIcon
 from src.views.edit_window import EditWindow
+from src.views.translation_window import TranslationWindow
 from src.views.tray_icon import TrayIcon
 from src.views.word_list import WordList
 from src.views.token_list import TokenList
 
 from src.services.mouse_monitor_worker import MouseMonitorWorker
 from src.services.search_word import SearchWord
+from src.services.translation import TranslationWorker
 
 
 class MainWindow(QMainWindow):
@@ -41,6 +43,7 @@ class MainWindow(QMainWindow):
         self.floating_icon.search_signal.connect(self.search)
 
         self.edit_window = EditWindow()
+        self.translation_window = TranslationWindow()
 
         self.search_succeed_signal.connect(self.show_words)
         self.search_word = SearchWord(self.search_succeed_signal)
@@ -91,6 +94,10 @@ class MainWindow(QMainWindow):
 
         source_hbox = QHBoxLayout()
         source_hbox.addStretch(1)
+
+        translate_label = QLabel('翻译')
+        translate_label.mousePressEvent = lambda _: self.on_translate()
+        source_hbox.addWidget(translate_label)
 
         if config_manager.hujiang_enabled():
             hujiang_label = QLabel('hujiang')
@@ -191,3 +198,13 @@ class MainWindow(QMainWindow):
 
     def show_edit_window(self):
         self.edit_window.show_window(self.current_token)
+
+    def on_translate(self):
+        if not self.copy_text:
+            return
+        
+        self.translate_thread = TranslationWorker(self.copy_text)
+        self.translate_thread.translated_sig.connect(
+            lambda x: self.translation_window.show_window(x)
+        )
+        self.translate_thread.start()

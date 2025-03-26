@@ -14,6 +14,7 @@ for dir in ['logs', 'data']:
 handler = TimedRotatingFileHandler(
     filename='logs/app.log',
     when='midnight',
+    encoding='utf8',
     interval=1,
     backupCount=7
 )
