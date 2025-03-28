@@ -5,6 +5,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 
+from src.services.translation import TranslationWorker
+
 
 class TranslationWindow(QDialog):
 
@@ -21,7 +23,15 @@ class TranslationWindow(QDialog):
 
         self.setLayout(vbox)
 
-    def show_window(self, content=''):
-        self.content.setText(content)
-        self.show()
+    def show(self, content=''):
+        self.content.setText('翻译中...')
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        super().show()
+
+        self.thread = TranslationWorker(content)
+        self.thread.translated_sig.connect(
+                    lambda x: self.content.setText(x)
+                )
+        self.thread.start()
+
 

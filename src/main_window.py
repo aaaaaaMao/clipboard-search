@@ -24,7 +24,6 @@ from src.views.token_list import TokenList
 
 from src.services.mouse_monitor_worker import MouseMonitorWorker
 from src.services.search_word import SearchWord
-from src.services.translation import TranslationWorker
 
 
 class MainWindow(QMainWindow):
@@ -203,8 +202,5 @@ class MainWindow(QMainWindow):
         if not self.copy_text:
             return
         
-        self.translate_thread = TranslationWorker(self.copy_text)
-        self.translate_thread.translated_sig.connect(
-            lambda x: self.translation_window.show_window(x)
-        )
-        self.translate_thread.start()
+        self.translation_window.show(self.copy_text)
+    
