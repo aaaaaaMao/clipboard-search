@@ -25,7 +25,6 @@ class TranslationWindow(QDialog):
 
     def show(self, content=''):
         self.content.setText('翻译中...')
-        self.setWindowFlags(Qt.WindowStaysOnTopHint)
         super().show()
 
         self.thread = TranslationWorker(content)
@@ -34,4 +33,6 @@ class TranslationWindow(QDialog):
                 )
         self.thread.start()
 
-
+    def focusOutEvent(self, event):
+        super().focusOutEvent(event)
+        self.hide()

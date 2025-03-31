@@ -202,5 +202,6 @@ class MainWindow(QMainWindow):
         if not self.copy_text:
             return
         
+        self.translation_window.move(self.position + QPoint(20, -100))
         self.translation_window.show(self.copy_text)
     
