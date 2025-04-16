@@ -1,4 +1,8 @@
+import asyncio
+from dataclasses import dataclass
+
 from PyQt5.QtCore import pyqtSignal
+from mdict_query_r.query import Querier, Dictionary
 
 from src.services.jp_word import list_words
 from src.services.dictionary import search as search_word_from_dict
@@ -7,14 +11,36 @@ from src.utils import utils
 
 from src import config_manager
 
+@dataclass
+class SearchResultData:
+    keyword: str = None
+    content: str = None
 
 class SearchWord:
 
     def __init__(self, search_succeed_signal: pyqtSignal):
         self.search_succeed_signal = search_succeed_signal
+        self._mdict_querier: Querier = None
 
         if config_manager.hujiang_enabled():
             self.hujiang = HuJiang(config_manager.config, self.search_succeed_signal)
+
+        asyncio.run(self.init_mdict_querier())
+
+    async def init_mdict_querier(self):
+        dictionaries = config_manager.list_dictionaries()
+        if len(dictionaries) == 0:
+            return
+        
+        dictionaries = [
+            Dictionary(
+                name=d['name'], 
+                filepath=config_manager.get_dictionary_path(d['name'], ext='.mdx')
+            )
+            for d in dictionaries
+        ]
+
+        self._mdict_querier = Querier(dictionaries)
 
     def search(self, word: str, source=''):
         if not str:
@@ -26,15 +52,21 @@ class SearchWord:
             if w['data'].source == '自建':
                 w['data'].content = f'{w["data"].kana}\n---\n{w["data"].content}'
             existed.add(utils.trim(w['data'].content))
-        for w in search_word_from_dict(word):
-            content = utils.trim(w['data'].content)
-            style_sheet = config_manager.get_dictionary_style_sheet(w['source'])
+
+        for w in self._mdict_querier.query(word):
+            content = utils.trim(w['record'])
+            style_sheet = config_manager.get_dictionary_style_sheet(w['dictionary'])
             if style_sheet:
-                # w['data'].content = utils.extract_meanings(content)
-                w['data'].content = f'<style>{style_sheet}</style>{content}'
+                content = f'<style>{style_sheet}</style>{content}'
 
             if not content in existed:
-                words.append(w)
+                words.append({
+                    'source': w['dictionary'],
+                    'data': SearchResultData(
+                            keyword=word,
+                            content=content
+                        )
+                })
 
         if source == 'hujiang' and self.hujiang:
             self.hujiang.search(word)
