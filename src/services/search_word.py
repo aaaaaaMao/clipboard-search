@@ -5,7 +5,6 @@ from PyQt5.QtCore import pyqtSignal
 from mdict_query_r.query import Querier, Dictionary
 
 from src.services.jp_word import list_words
-from src.services.dictionary import search as search_word_from_dict
 from src.services.hujiang import HuJiang
 from src.utils import utils
 
