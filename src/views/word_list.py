@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 
-from src import logging, word_list_style_sheet as style_sheet
+from src import logging
 from src.services.jp_word import save_word, remove_word_by_id
 from src.models.jp_word import JPWord
 from src.services.hujiang import JPWordHj
