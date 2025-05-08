@@ -37,4 +37,4 @@ def read_clipboard():
 
 
 
-    return utils.trim(content)
+    return utils.trim(content, True)

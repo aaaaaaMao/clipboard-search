@@ -3,9 +3,11 @@ import re
 from bs4 import BeautifulSoup
 
 
-def trim(content: str):
-    return content.strip().replace('\r\n', '\n')
-
+def trim(content: str, remove_new_line=False) -> str:
+    if remove_new_line:
+        return re.sub(r'(\r\n|\n)+', '', content).strip()
+    else:
+        return content.strip().replace('\r\n', '\n')
 
 def extract_kana(content: str):
     soup = BeautifulSoup(content, 'html.parser')
