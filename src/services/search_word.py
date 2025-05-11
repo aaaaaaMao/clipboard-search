@@ -12,6 +12,7 @@ from src import config_manager
 
 @dataclass
 class SearchResultData:
+    id: int = None
     keyword: str = None
     content: str = None
 
@@ -52,18 +53,19 @@ class SearchWord:
                 w['data'].content = f'{w["data"].kana}\n---\n{w["data"].content}'
             existed.add(utils.trim(w['data'].content))
 
-        for w in self._mdict_querier.query(word):
-            content = utils.trim(w['record'])
-            style_sheet = config_manager.get_dictionary_style_sheet(w['dictionary'])
+        for record in self._mdict_querier.query(word):
+            content = utils.trim(record.entry.data)
+            style_sheet = config_manager.get_dictionary_style_sheet(record.dictionary_name)
             if style_sheet:
                 content = f'<style>{style_sheet}</style>{content}'
 
             if not content in existed:
                 words.append({
-                    'source': w['dictionary'],
+                    'source': record.dictionary_name,
                     'data': SearchResultData(
-                            keyword=word,
-                            content=content
+                            id=record.entry.id,
+                            keyword=record.entry.key_text,
+                            content=record.entry.data
                         )
                 })
 
