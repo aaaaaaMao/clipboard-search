@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QSystemTrayIcon,
     QLineEdit,
+    QStackedWidget,
 )
 from PyQt5.QtCore import QSize, Qt, QObject, QThread, pyqtSignal, QEvent, QPoint
 from PyQt5.QtGui import QIcon, QCursor
@@ -17,7 +18,7 @@ from PyQt5.QtGui import QIcon, QCursor
 from src import logging, config_manager
 from src.views.floating_icon import FloatingIcon
 from src.views.edit_window import EditWindow
-from src.views.translation_window import TranslationWindow
+from src.views.translation import Translation
 from src.views.tray_icon import TrayIcon
 from src.views.word_list import WordList
 from src.views.token_list import TokenList
@@ -42,7 +43,6 @@ class MainWindow(QMainWindow):
         self.floating_icon.search_signal.connect(self.search)
 
         self.edit_window = EditWindow()
-        self.translation_window = TranslationWindow()
 
         self.search_succeed_signal.connect(self.show_words)
         self.search_word = SearchWord(self.search_succeed_signal)
@@ -94,9 +94,9 @@ class MainWindow(QMainWindow):
         source_hbox = QHBoxLayout()
         source_hbox.addStretch(1)
 
-        translate_label = QLabel('翻译')
-        translate_label.mousePressEvent = lambda _: self.on_translate()
-        source_hbox.addWidget(translate_label)
+        self.conetnt_switch_label = QLabel('翻译')
+        self.conetnt_switch_label.mousePressEvent = lambda _: self.on_switch_content()
+        source_hbox.addWidget(self.conetnt_switch_label)
 
         if config_manager.hujiang_enabled():
             hujiang_label = QLabel('hujiang')
@@ -117,8 +117,12 @@ class MainWindow(QMainWindow):
         )
         vbox.addWidget(self.token_list)
 
+        self.stack_widget = QStackedWidget()
         self.word_list = WordList()
-        vbox.addWidget(self.word_list)
+        self.translation = Translation()
+        self.stack_widget.addWidget(self.word_list)
+        self.stack_widget.addWidget(self.translation)
+        vbox.addWidget(self.stack_widget)
 
         main_widget = QWidget()
         main_widget.setLayout(vbox)
@@ -202,6 +206,15 @@ class MainWindow(QMainWindow):
         if not self.copy_text:
             return
         
-        self.translation_window.move(self.position + QPoint(20, -100))
-        self.translation_window.show(self.copy_text)
+        self.stack_widget.setCurrentIndex(1)
+        self.translation.translate(self.copy_text)
+
+    def on_switch_content(self):
+        if self.stack_widget.currentIndex() == 0:
+            self.conetnt_switch_label.setText('单词')
+            self.stack_widget.setCurrentIndex(1)
+            self.on_translate()
+        else:
+            self.conetnt_switch_label.setText('词典')
+            self.stack_widget.setCurrentIndex(0)
     
