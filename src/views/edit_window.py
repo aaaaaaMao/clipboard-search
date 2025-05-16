@@ -53,6 +53,8 @@ class EditWindow(QDialog):
         self.word_input.setText(word)
         self.kana_input.clear()
         self.content_input.clear()
+        
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.show()
 
     def save_word(self):

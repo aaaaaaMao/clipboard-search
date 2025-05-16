@@ -153,15 +153,18 @@ class MainWindow(QMainWindow):
 
     def show_window(self):
         if (self.isMinimized() or not self.isVisible()) and self.copy_text:
-            self.move(self.position.x() + 20, self.position.y() - 100)
+            self.move(self.position + QPoint(20, -100))
 
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
             if self.floating_icon.isVisible():
                 self.floating_icon.close()
+
+            self.conetnt_switch_label.setText('翻译')
+            self.stack_widget.setCurrentIndex(0)
             self.showNormal()
 
     def show_floating_icon(self, selectedText):
-        if self.in_main_window:
+        if self.in_main_window or self.edit_window.isVisible():
             return
         
         self.position = QCursor().pos() + QPoint(20, -20)
@@ -185,7 +188,8 @@ class MainWindow(QMainWindow):
         if source == self:
             if event.type() == QEvent.WindowDeactivate:
                 self.in_main_window = False
-                self.hide()
+                if not self.edit_window.isVisible():
+                    self.hide()
             if event.type() == QEvent.WindowActivate:
                 self.in_main_window = True
         return super().eventFilter(source, event)
@@ -211,10 +215,10 @@ class MainWindow(QMainWindow):
 
     def on_switch_content(self):
         if self.stack_widget.currentIndex() == 0:
-            self.conetnt_switch_label.setText('单词')
+            self.conetnt_switch_label.setText('词典')
             self.stack_widget.setCurrentIndex(1)
             self.on_translate()
         else:
-            self.conetnt_switch_label.setText('词典')
+            self.conetnt_switch_label.setText('翻译')
             self.stack_widget.setCurrentIndex(0)
     
