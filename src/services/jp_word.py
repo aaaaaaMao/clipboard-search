@@ -14,7 +14,7 @@ def save_word(word, kana, source, content, source_id=None):
     word.save()
 
 def remove_word_by_id(id):
-    record = JPWord.get(id==id)
+    record = JPWord.get(JPWord.id==id)
     record.delete_instance()
 
 def list_words(word: str):
