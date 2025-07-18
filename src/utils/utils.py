@@ -110,3 +110,10 @@ def transform_kana(text: str) -> List[str]:
         result.append(''.join(hiragana))
 
     return result
+
+invalid_tokens = [
+    ' ', '　', '、', '。', '、', '・', '「', '」', '（', '）',
+    '【', '】', '〔', '〕', '［', '］', '《', '》', '〈', '〉',
+    '\n', '\r', '\t', '!', '?', '…', 'ー', '゛', '゜', 'ヽ', 'ヾ',
+    '『', '』',
+]
