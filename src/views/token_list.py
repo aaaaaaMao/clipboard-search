@@ -22,6 +22,8 @@ class TokenList(QListWidget):
         for t in transformed:
             for item in tag(t):
                 word_orth_base = item['orthBase']
+                if not word_orth_base:
+                    word_orth_base = item['token']
                 if self.is_invalid_token(word_orth_base):
                     continue
                 if word_orth_base and (word_orth_base not in dup):
@@ -31,6 +33,7 @@ class TokenList(QListWidget):
 
             if t not in dup:
                 self.addItem(t)
+                
         return tokens
 
     def is_invalid_token(self, word):
