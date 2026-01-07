@@ -6,7 +6,6 @@ from mdict_query_r.query import Querier, Dictionary
 
 from src.services.jp_word import list_words
 from src.services.hujiang import HuJiang
-from src.services.anki_connect import AnkiConnectClient
 from src.utils import utils
 
 from src import config_manager
@@ -25,8 +24,6 @@ class SearchWord:
 
         if config_manager.hujiang_enabled():
             self.hujiang = HuJiang(config_manager.config, self.search_succeed_signal)
-
-        self._anki_client = AnkiConnectClient()
 
         asyncio.run(self.init_mdict_querier())
 
@@ -55,22 +52,6 @@ class SearchWord:
             if w['data'].source == '自建':
                 w['data'].content = f'{w["data"].kana}\n---\n{w["data"].content}'
             existed.add(utils.trim(w['data'].content))
-
-        for record in self._anki_client.search_jp_words(word):
-            content = '\n'.join([
-                f'{record.kanji} ({record.furigana})',
-                f'{record.pitch} [{record.pos}]',
-                record.def_cn,
-                record.extra
-            ])
-            words.append({
-                'source': 'anki',
-                'data': SearchResultData(
-                    id=record.note_id,
-                    keyword=record.kanji,
-                    content=content
-                )
-            })
 
         for record in self._mdict_querier.query(word):
             content = utils.trim(record.entry.data)

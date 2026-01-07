@@ -3,6 +3,7 @@ from logging.handlers import TimedRotatingFileHandler
 import os
 
 from src.config import ConfigManager
+from src.services.anki_connect import AnkiConnectClient
 
 cwd = os.getcwd()
 
@@ -35,3 +36,5 @@ style_sheet_file = os.path.join(
 if os.path.exists(style_sheet_file):
     with open(style_sheet_file, 'r', encoding='utf8') as f:
         word_list_style_sheet = f.read()
+
+anki_client = AnkiConnectClient()

@@ -2,6 +2,8 @@ from dataclasses import dataclass
 
 import requests
 
+from src import logging
+
 @dataclass
 class AnkiJPWord:
     note_id: int
@@ -30,12 +32,21 @@ class AnkiConnectClient:
 
         r = requests.post(self._url, json=payload)
         return r.json()
-    
-    def search_jp_words(self, word: str) -> list[AnkiJPWord]:
-        query = f'deck:NEW-JLPT and (vocabkanji:"{word}" or vocabfurigana:"{word}" or vocabplus:"{word}")'
-        result_data =  self.invoke("notesInfo", {
+
+    def query_notes(self, query: str) -> list[dict]:
+        result_data = self.invoke("notesInfo", {
             "query": query
         })
+
+        if result_data['error'] is not None:
+            logging.error(f"AnkiConnectClient query_notes error: {result_data['error']}")
+            return []
+
+        return result_data['result']
+
+    def search_jp_words(self, word: str) -> list[AnkiJPWord]:
+        query = f'deck:NEW-JLPT and (vocabkanji:"{word}" or vocabfurigana:"{word}" or vocabplus:"{word}")'
+        notes = self.query_notes(query)
 
         return [
             AnkiJPWord(
@@ -48,5 +59,21 @@ class AnkiConnectClient:
                 extra=item['fields']['VocabPlus']['value'],
                 audio=item['fields']['VocabAudio']['value'],
                 tags=item['tags']
-            ) for item in result_data['result']
+            ) for item in notes
         ]
+    
+    def add_tags(self, note_ids: list[int], tags: list[str]) -> None:
+        result_data = self.invoke("addTags", {
+            "notes": note_ids,
+            "tags": ' '.join(tags)
+        })
+
+        return result_data['result'] is None
+    
+    def remove_tags(self, note_ids: list[int], tags: list[str]) -> None:
+        result_data = self.invoke("removeTags", {
+            "notes": note_ids,
+            "tags": ' '.join(tags)
+        })
+
+        return result_data['result'] is None

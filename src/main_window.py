@@ -20,11 +20,10 @@ from src.views.floating_icon import FloatingIcon
 from src.views.edit_window import EditWindow
 from src.views.translation import Translation
 from src.views.tray_icon import TrayIcon
-from src.views.word_list import WordList
+from src.widgets.word_list.word_list import WordList
 from src.views.token_list import TokenList
 
 from src.services.mouse_monitor_worker import MouseMonitorWorker
-from src.services.search_word import SearchWord
 
 
 class MainWindow(QMainWindow):
@@ -45,7 +44,6 @@ class MainWindow(QMainWindow):
         self.edit_window = EditWindow()
 
         self.search_succeed_signal.connect(self.show_words)
-        self.search_word = SearchWord(self.search_succeed_signal)
 
         self.init_ui()
 
@@ -100,9 +98,7 @@ class MainWindow(QMainWindow):
 
         if config_manager.hujiang_enabled():
             hujiang_label = QLabel('hujiang')
-            hujiang_label.mousePressEvent = \
-                lambda _: self.search_word.search(
-                    self.current_token, source='hujiang')
+
             source_hbox.addWidget(hujiang_label)
 
         new_label = QLabel('编辑')
@@ -143,7 +139,7 @@ class MainWindow(QMainWindow):
 
             tokens = self.token_list.tokenizer(self.copy_text)
             if tokens:
-                self.search_word.search(tokens[0])
+                self.word_list.search_words(tokens[0:1])
                 self.current_token = tokens[0]
             else:
                 self.show_words([])
@@ -177,7 +173,6 @@ class MainWindow(QMainWindow):
 
     def select_token(self, token: str):
         self.current_token = token
-        self.search_word.search(token)
 
     def on_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
