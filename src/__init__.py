@@ -4,6 +4,9 @@ import os
 
 from src.config import ConfigManager
 from src.services.anki_connect import AnkiConnectClient
+from src.context import Context
+
+ctx = Context()
 
 cwd = os.getcwd()
 

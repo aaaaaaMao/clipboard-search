@@ -15,7 +15,7 @@ from PyQt5.QtCore import QSize, Qt, QObject, QThread, pyqtSignal, QEvent, QPoint
 from PyQt5.QtGui import QIcon, QCursor
 
 
-from src import logging, config_manager
+from src import logging, config_manager, ctx
 from src.views.floating_icon import FloatingIcon
 from src.views.edit_window import EditWindow
 from src.views.translation import Translation
@@ -28,12 +28,9 @@ from src.services.mouse_monitor_worker import MouseMonitorWorker
 
 class MainWindow(QMainWindow):
 
-    search_succeed_signal = pyqtSignal(list)
-
     def __init__(self):
         QMainWindow.__init__(self)
 
-        self.in_main_window = False
         self.installEventFilter(self)
 
         self.position = QPoint(10, 10)
@@ -42,8 +39,6 @@ class MainWindow(QMainWindow):
         self.floating_icon.search_signal.connect(self.search)
 
         self.edit_window = EditWindow()
-
-        self.search_succeed_signal.connect(self.show_words)
 
         self.init_ui()
 
@@ -141,15 +136,13 @@ class MainWindow(QMainWindow):
             if tokens:
                 self.current_token = tokens[0]
                 self.word_list.search_words(tokens[0:1])
-                
             else:
-                self.show_words([])
-
-    def show_words(self, words):
-        self.word_list.show_words(words)
+                self.word_list.show_words([])
 
     def show_window(self):
         if (self.isMinimized() or not self.isVisible()) and self.copy_text:
+            ctx.copy_clipboard_disabled = True
+
             self.move(self.position + QPoint(20, -100))
 
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
@@ -160,10 +153,7 @@ class MainWindow(QMainWindow):
             self.stack_widget.setCurrentIndex(0)
             self.showNormal()
 
-    def show_floating_icon(self, selectedText):
-        if self.in_main_window or self.edit_window.isVisible():
-            return
-        
+    def show_floating_icon(self, selectedText):        
         self.position = QCursor().pos() + QPoint(20, -20)
 
         if self.isVisible():
@@ -184,11 +174,13 @@ class MainWindow(QMainWindow):
     def eventFilter(self, source: 'QObject', event: 'QEvent') -> bool:
         if source == self:
             if event.type() == QEvent.WindowDeactivate:
-                self.in_main_window = False
                 if not self.edit_window.isVisible():
+                    ctx.copy_clipboard_disabled = False
+
                     self.hide()
             if event.type() == QEvent.WindowActivate:
-                self.in_main_window = True
+                pass
+
         return super().eventFilter(source, event)
 
     def catch_exceptions(self, err_type, err_value, err_traceback):

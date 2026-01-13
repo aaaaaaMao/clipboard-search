@@ -4,7 +4,7 @@ import time
 import keyboard
 from pynput import mouse
 
-from src import config_manager, logging
+from src import config_manager, logging, ctx
 from src.services.clipboard import read_clipboard
 
 
@@ -77,8 +77,9 @@ class MouseMonitorWorker(QThread):
         return diff > delta
 
     def show_icon_window(self):
-        content = read_clipboard()
-        self.show_icon_window_sig.emit(content)
+        if not ctx.copy_clipboard_disabled:
+            content = read_clipboard()
+            self.show_icon_window_sig.emit(content)
 
     def log(self, message):
         if not self._debug:

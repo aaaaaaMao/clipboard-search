@@ -1,26 +1,14 @@
-import json
-from dataclasses import dataclass
-
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (
     QWidget,
-    QHBoxLayout,
     QVBoxLayout,
-    QListWidgetItem,
-    QLabel,
     QCheckBox,
-    QListWidget,
     QTextEdit,
     QSizePolicy
 )
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt
 
-from src import logging, anki_client
-from src.services.jp_word import save_word, remove_word_by_id
-from src.models.jp_word import JPWord
-from src.services.hujiang import JPWordHj
-from src.utils import utils
-
+from src import anki_client
 from .search_service import SearchResult
 
 
