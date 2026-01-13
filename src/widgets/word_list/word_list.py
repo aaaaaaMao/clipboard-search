@@ -42,11 +42,11 @@ class WordList(QListWidget):
         self.itemDoubleClicked.connect(self.on_item_double_clicked)
         self.setResizeMode(QListWidget.Adjust)
 
-    def search_words(self, words):
+    def search_words(self, words, sources: list[str]=['anki', 'mdict']):
         self.clear()
         self.addItem('Searching ...')
 
-        self._search_service.search_words(words)
+        self._search_service.search_words(words, sources)
 
     def on_item_double_clicked(self, item: QListWidgetItem):
         widget = self.itemWidget(item)

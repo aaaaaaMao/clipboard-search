@@ -1,11 +1,8 @@
 from dataclasses import dataclass
 import re
 
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-from PyQt5.QtCore import QUrl, pyqtSignal
 from bs4 import BeautifulSoup
-
-from src import logging
+import requests
 
 
 @dataclass
@@ -27,36 +24,18 @@ class JPWordHj:
         ])
 
 
-class HuJiang():
+class HuJiangClient():
 
-    def __init__(self, config, search_succeed_signal: pyqtSignal):
+    def __init__(self, config):
         self.base_url = config['hujiang']['req_url']
         self.headers = config['hujiang']['req_headers']
-        self.search_succeed_signal = search_succeed_signal
 
-    def search(self, word):
+    def search(self, word) -> list[JPWordHj]:
         url = self.base_url + word
-        req = QNetworkRequest(QUrl(url))
-        for k in self.headers:
-            req.setRawHeader(bytes(k, 'utf-8'),
-                             bytes(self.headers[k], 'utf-8'))
 
-        self.nam = QNetworkAccessManager()
-        self.nam.finished.connect(self.handle_resp)
-        self.nam.get(req)
+        r = requests.get(url, headers=self.headers)
 
-    def handle_resp(self, resp):
-        err = resp.error()
-
-        if err == QNetworkReply.NoError:
-            bytes_string = resp.readAll()
-            result = self.parse(str(bytes_string, 'utf-8'))
-
-            self.search_succeed_signal.emit(
-                list(map(lambda x: {'source': 'hujiang', 'data': x}, result))
-            )
-        else:
-            logging.error(resp.errorString())
+        return self.parse(r.text)
 
     def parse(self, text):
         soup = BeautifulSoup(text, 'html.parser')

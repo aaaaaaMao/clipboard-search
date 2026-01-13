@@ -5,6 +5,7 @@ import asyncio
 
 from PyQt5.QtCore import pyqtSignal
 from mdict_query_r.query import Querier, Dictionary
+from src.services.hujiang import HuJiangClient
 
 from src import config_manager, anki_client
 
@@ -15,7 +16,7 @@ class SearchResult:
     source: str = None
     keyword: str = None
     html_content: str = None
-    raw_data:dict = None
+    raw_data: dict = None
 
 class SearchService():
 
@@ -24,6 +25,14 @@ class SearchService():
         self._executor = ThreadPoolExecutor(max_workers=3)
 
         self._mdict_querier: Querier = None
+
+        self._hujiang_client = HuJiangClient(config=config_manager.config)
+
+        self._search_method = {
+            'anki': self._search_from_anki,
+            'mdict': self._search_from_mdict,
+            'hujiang': self._search_from_hujiang,
+        }
 
         asyncio.run(self.init_mdict_querier())
 
@@ -42,11 +51,16 @@ class SearchService():
 
         self._mdict_querier = Querier(dictionaries)
 
-    def search_words(self, words: list[str]):
+    def search_words(self, words: list[str], sources: list[str] = ['anki', 'mdict']):
         futures = []
 
+        methods = [self._search_method[s] for s in sources if s in self._search_method]
+        if len(methods) == 0:
+            self._signal.emit([])
+            return
+
         for word in words:
-            for f in [self._search_from_anki, self._search_from_mdict]:
+            for f in methods:
                 futures.append(
                     self._executor.submit(f, word)
                 )
@@ -96,6 +110,25 @@ class SearchService():
                 id=record.entry.id,
                 keyword=record.entry.key_text,
                 html_content=html_content,
+            ))
+
+        return words
+
+    def _search_from_hujiang(self, word: str):
+        words: list[SearchResult]  = []
+
+        for record in self._hujiang_client.search(word):
+            html_content = '<br />'.join([
+                f'{record.word} ({record.pronounces})',
+                f'{record.word_type}',
+                '<br />'.join(record.translation)
+            ])
+
+            words.append(SearchResult(
+                source='hujiang',
+                keyword=record.word,
+                html_content=html_content,
+                raw_data=asdict(record),
             ))
 
         return words

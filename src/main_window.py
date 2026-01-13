@@ -98,7 +98,7 @@ class MainWindow(QMainWindow):
 
         if config_manager.hujiang_enabled():
             hujiang_label = QLabel('hujiang')
-
+            hujiang_label.mousePressEvent = lambda _: self.word_list.search_words([self.current_token], sources=['hujiang'])
             source_hbox.addWidget(hujiang_label)
 
         new_label = QLabel('编辑')
@@ -139,8 +139,9 @@ class MainWindow(QMainWindow):
 
             tokens = self.token_list.tokenizer(self.copy_text)
             if tokens:
-                self.word_list.search_words(tokens[0:1])
                 self.current_token = tokens[0]
+                self.word_list.search_words(tokens[0:1])
+                
             else:
                 self.show_words([])
 
@@ -172,6 +173,7 @@ class MainWindow(QMainWindow):
         self.floating_icon.show(self.position)
 
     def select_token(self, token: str):
+        self.word_list.search_words([token])
         self.current_token = token
 
     def on_tray_icon_activated(self, reason):
