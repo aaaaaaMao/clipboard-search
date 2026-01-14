@@ -54,6 +54,9 @@ class ConfigManager:
             return None
         return os.path.join(self.cwd, 'resources/images', self.get(icon_name))
     
+    def get_image_file_path(self, file_name: str):
+        return os.path.join(self.cwd, 'resources/images', file_name)
+    
     def list_dictionaries(self):
         return self.get('dictionaries')
     

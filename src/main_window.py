@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QStackedWidget,
 )
-from PyQt5.QtCore import QSize, Qt, QObject, QThread, pyqtSignal, QEvent, QPoint
+from PyQt5.QtCore import QSize, Qt, QObject, QThread, QEvent, QPoint
 from PyQt5.QtGui import QIcon, QCursor
 
 

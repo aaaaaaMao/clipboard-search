@@ -2,13 +2,17 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QCheckBox,
     QTextEdit,
-    QSizePolicy
+    QSizePolicy,
+    QLabel,
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt5.QtGui import QPixmap
 
-from src import anki_client
+from src import anki_client, config_manager
 from .search_service import SearchResult
 
 
@@ -19,7 +23,11 @@ class WordListItem(QWidget):
     def __init__(self, item: SearchResult):
         super().__init__()
 
+        self._item = item
+
         layout = QVBoxLayout(self)
+
+        operations_layout = QHBoxLayout()
 
         if item.source == 'anki':
             self.check = QCheckBox()
@@ -29,8 +37,19 @@ class WordListItem(QWidget):
 
             if self.anki_tag in item.raw_data.get('tags', []):
                 self.check.setChecked(True)
+            operations_layout.addWidget(self.check)
 
-            layout.addWidget(self.check)
+            image = QPixmap(config_manager.get_image_file_path('volume.png'))
+            image = image.scaled(15, 15, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+
+            self.audio = QLabel()
+            self.audio.setPixmap(image)
+            self.audio.mousePressEvent = lambda _: self.on_play_audio()
+            operations_layout.addWidget(self.audio)
+
+            operations_layout.addStretch(1)
+
+        layout.addLayout(operations_layout)
 
         self.html_content = QTextEdit()
         self.html_content.setHtml(item.html_content)
@@ -64,3 +83,15 @@ class WordListItem(QWidget):
         else:
             succeed = anki_client.remove_tags([item.id], [self.anki_tag])
             self.check.setChecked(not succeed)
+
+    def on_play_audio(self):
+        if self._item.source != 'anki':
+            return
+
+        audio_file_path = anki_client.get_audio_file_path(self._item.raw_data['audio'])
+        if not audio_file_path:
+            return
+
+        player = QMediaPlayer()
+        player.setMedia(QMediaContent(QUrl.fromLocalFile(audio_file_path)))
+        player.play()

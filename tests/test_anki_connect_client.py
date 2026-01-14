@@ -39,6 +39,9 @@ def test_search_jp_words(client):
         )
     ]
 
+    audio_file_path = client.get_audio_file_path(result[0].audio)
+    assert audio_file_path.endswith('collection.media\\あっさり_アッサ＼リ_3_NHK-2016-local.mp3')
+
 def test_add_tags(client):
     query = f'deck:"API 测试" and vocabkanji:"漢字"'
 

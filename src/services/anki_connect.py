@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+import os
+import re
 
 import requests
 
@@ -77,3 +79,12 @@ class AnkiConnectClient:
         })
 
         return result_data['result'] is None
+    
+    def get_audio_file_path(self, filename: str) -> str:
+        result_data = self.invoke("getMediaDirPath")
+
+        if result_data['error'] is not None:
+            logging.error(f"AnkiConnectClient get_audio_file_path error: {result_data['error']}")
+            return ""
+
+        return os.path.join(result_data['result'], re.sub(r'^\[sound:(.+)\]$', r'\1', filename))
