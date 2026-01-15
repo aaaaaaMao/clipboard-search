@@ -1,27 +1,11 @@
-import json
-import math
-
-from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QVBoxLayout,
     QListWidgetItem,
     QLabel,
-    QCheckBox,
     QListWidget,
-    QTextEdit,
-    QSizePolicy
 )
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import pyqtSignal
 
-from src import logging
-from src.services.jp_word import save_word, remove_word_by_id
-from src.models.jp_word import JPWord
-from src.services.hujiang import JPWordHj
-from src.utils import utils
-
-from .search_service import SearchService, SearchResult
+from .search_service import SearchService
 from .word_item import WordListItem
 
 

@@ -17,7 +17,7 @@ from PyQt5.QtGui import QIcon, QCursor
 
 from src import logging, config_manager, ctx
 from src.views.floating_icon import FloatingIcon
-from src.views.edit_window import EditWindow
+from src.windows.edit_window import EditWindow
 from src.views.translation import Translation
 from src.views.tray_icon import TrayIcon
 from src.widgets.word_list.word_list import WordList

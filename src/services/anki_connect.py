@@ -88,3 +88,16 @@ class AnkiConnectClient:
             return ""
 
         return os.path.join(result_data['result'], re.sub(r'^\[sound:(.+)\]$', r'\1', filename))
+    
+    # list audio sources from "Local Audio Server for Yomichan" Anki add-on
+    def list_audio_sources(self,term: str, reading: str):
+        r = requests.get(f"http://localhost:5050/?term={term}&reading={reading}")
+        if r.status_code != 200:
+            logging.error(f"AnkiConnectClient list_audio_sources error: status code {r.status_code}")
+            return []
+        
+        sources = r.json()["audioSources"]
+        for source in sources:
+            source["url"] = re.sub(r'\\', '/', source["url"])
+
+        return sources
