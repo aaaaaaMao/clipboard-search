@@ -1,4 +1,6 @@
 import pytest
+import re
+import hashlib
 
 from src.services.anki_connect import AnkiConnectClient, AnkiJPWord
 
@@ -71,3 +73,45 @@ def test_add_tags(client):
     assert 'test-tag-1' in tags
     assert 'test-tag-2' not in tags
     assert len(tags) == 3
+
+def test_add_note(client):
+    deck_name = "API 测试"
+    model_name = "JLPT-NEW"
+    fields = {
+        "VocabKanji": "测试汉字",
+        "VocabFurigana": "テストカンジ",
+        "VocabPitch": "①",
+        "VocabPoS": "名・他动1",
+        "VocabDefCN": "测试用的汉字",
+        "VocabPlus": "",
+        "SentKanji1": "これはテスト用の漢字です。",
+        "SentFurigana1": "これはテストようのかんじです。",
+        "SentDef1": "This is a test kanji."
+    }
+    tags = ["api-test"]
+    audio = {   
+        "filename": "SMK8 \u30a6\u30ab\u30c4 [0]", 
+        "url": "http://localhost:5050/shinmeikai8/media/03108.mp3",
+        "fields": ["VocabAudio"]
+    }
+    audio['filename'] = re.sub(r' ', '-', f'{fields["VocabKanji"]}_{fields["VocabFurigana"]}━{audio['filename']}.mp3')
+    audio['skipHash'] = hashlib.md5(audio['filename'].encode('utf-8')).hexdigest()
+    fields['NoteID'] = audio['skipHash']
+
+    query = f'deck:"API 测试" and vocabkanji:"测试汉字"'
+    notes = client.query_notes(query)
+    note_ids = [note['noteId'] for note in notes]
+
+    if len(note_ids) > 0:
+        client.invoke("deleteNotes", {
+            "notes": note_ids
+        })
+
+    note_id = client.add_note(deck_name, model_name, fields, tags, audio)
+
+    assert isinstance(note_id, int)
+
+    # 验证笔记已添加
+    notes = client.query_notes(query)
+    assert len(notes) == 1
+    assert notes[0]['noteId'] == note_id

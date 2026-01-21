@@ -101,3 +101,31 @@ class AnkiConnectClient:
             source["url"] = re.sub(r'\\', '/', source["url"])
 
         return sources
+
+    def add_note(self, deck_name: str, model_name: str, fields: dict, tags: list[str]=[], audio=None) -> bool:
+        note = {
+            "deckName": deck_name,
+            "modelName": model_name,
+            "fields": fields,
+            "tags": tags,
+            "options": {
+                "allowDuplicate": False,
+                "duplicateScope": "deck",
+                "duplicateScopeOptions": {
+                    "deckName": deck_name,
+                    "checkChildren": False,
+                    "checkAllModels": False
+                }
+            },
+            "audio": [audio] if audio else []
+        }
+
+        result_data = self.invoke("addNote", {
+            "note": note
+        })
+
+        if result_data['error'] is not None:
+            logging.error(f"AnkiConnectClient add_note error: {result_data['error']}")
+            return False
+
+        return result_data['result']
