@@ -86,7 +86,7 @@ def test_add_note(client):
         "VocabPlus": "",
         "SentKanji1": "これはテスト用の漢字です。",
         "SentFurigana1": "これはテストようのかんじです。",
-        "SentDef1": "This is a test kanji."
+        "SentDef1": re.sub(r' ', '&nbsp', f'This is a test kanji.')
     }
     tags = ["api-test"]
     audio = {   
