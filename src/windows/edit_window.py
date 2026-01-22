@@ -55,12 +55,15 @@ class EditWindow(QDialog):
 
         self.save_btn = QPushButton('保存')
         self.save_btn.clicked.connect(self.save_word)
-        self.save_btn.setDisabled(True)
         self.main_layout.addRow(self.save_btn)
 
         self.setLayout(self.main_layout)
 
     def show_window(self, word=''):
+        self.save_btn.setDisabled(True)
+        self.selected_audio_source = None
+        self.audio_sources = []
+
         for field in self.fields:
             self.input[field].clear()
 
@@ -84,15 +87,15 @@ class EditWindow(QDialog):
         audio = None
         if self.selected_audio_source:
             audio = {
-            "filename": self.selected_audio_source['name'], 
-            "url": self.selected_audio_source['url'],
-            "fields": ["VocabAudio"]
-        }
+                "filename": self.selected_audio_source['name'], 
+                "url": self.selected_audio_source['url'],
+                "fields": ["VocabAudio"]
+            }
             
-        audio['filename'] = re.sub(r' ', '-', f'{fields["VocabKanji"]}_{fields["VocabFurigana"]}━{audio['filename']}.mp3')
-        note_hash = hashlib.md5(audio['filename'].encode('utf-8')).hexdigest()
-        audio['skipHash'] = note_hash   
-        fields['NoteID'] = note_hash
+            audio['filename'] = re.sub(r' ', '-', f'{fields["VocabKanji"]}_{fields["VocabFurigana"]}━{audio['filename']}.mp3')
+            audio['skipHash'] = hashlib.md5(audio['filename'].encode('utf-8')).hexdigest()
+        
+        fields['NoteID'] = hashlib.md5(f'{deck_name}:{fields["VocabKanji"]}_{fields["VocabFurigana"]}'.encode('utf-8')).hexdigest()
 
         if 'VocabKanji' not in fields or 'VocabFurigana' not in fields:
             return

@@ -47,7 +47,7 @@ class AnkiConnectClient:
         return result_data['result']
 
     def search_jp_words(self, word: str) -> list[AnkiJPWord]:
-        query = f'deck:NEW-JLPT and (vocabkanji:"{word}" or vocabfurigana:"{word}" or vocabplus:"{word}")'
+        query = f'(deck:NEW-JLPT or deck:额外) and (vocabkanji:"{word}" or vocabfurigana:"{word}" or vocabplus:"{word}")'
         notes = self.query_notes(query)
 
         return [

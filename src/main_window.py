@@ -113,6 +113,7 @@ class MainWindow(QMainWindow):
         self.translation = Translation()
         self.stack_widget.addWidget(self.word_list)
         self.stack_widget.addWidget(self.translation)
+        self.stack_widget.setContentsMargins(0, 0, 0, 0)
         vbox.addWidget(self.stack_widget)
 
         main_widget = QWidget()
