@@ -123,17 +123,18 @@ class MainWindow(QMainWindow):
         self.tray_icon = TrayIcon(self.main_icon)
         self.tray_icon.show()
 
-    def search(self):
+    def search(self, text = ''):
         self.current_token = ''
-        if self.copy_text:
+        _text = text or self.copy_text
+        if _text:
             if config_manager.in_debug():
-                logging.info(f'Search: {self.copy_text}')
+                logging.info(f'Search: {_text}')
 
             self.show_window()
             self.search_input.clear()
             self.token_list.clear()
 
-            tokens = self.token_list.tokenizer(self.copy_text)
+            tokens = self.token_list.tokenizer(_text)
             if tokens:
                 self.current_token = tokens[0]
                 self.word_list.search_words(tokens[0:1])

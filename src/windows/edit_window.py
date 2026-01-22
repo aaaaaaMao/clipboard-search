@@ -64,6 +64,8 @@ class EditWindow(QDialog):
         self.selected_audio_source = None
         self.audio_sources = []
 
+        self.clear_audio_layout()
+
         for field in self.fields:
             self.input[field].clear()
 
@@ -79,7 +81,7 @@ class EditWindow(QDialog):
 
         fields = {}
         for field in self.fields:
-            value = self.input[field].text()
+            value = self.input[field].text().strip()
             if value:
                 fields[self.fields[field]] = re.sub(r' ', '&nbsp', value) if ' ' in value else value
 
@@ -103,9 +105,19 @@ class EditWindow(QDialog):
         anki_client.add_note(deck_name, model_name, fields, tags, audio)
         self.close()
 
+    def clear_audio_layout(self):
+        if self.audio_layout is not None:
+            while self.audio_layout.count():
+                item = self.audio_layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+
     def on_audio_label_click(self):
         term = self.input['汉字'].text()
         reading = self.input['假名'].text() or term
+
+        self.clear_audio_layout()
 
         self.audio_sources = anki_client.list_audio_sources(term, reading)
         self.save_btn.setDisabled(False)
