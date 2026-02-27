@@ -7,7 +7,7 @@ from src import config_manager
 
 class FloatingIcon(QWidget):
 
-    search_signal = pyqtSignal()
+    action_signal = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -43,7 +43,10 @@ class FloatingIcon(QWidget):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.hide()
-            self.search_signal.emit()
+            self.action_signal.emit('search')
+        if event.button() == Qt.RightButton:
+            self.hide()
+            self.action_signal.emit('translate')
 
     def show(self, position: QPoint):
         self.move(position)

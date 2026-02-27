@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
         self.position = QPoint(10, 10)
 
         self.floating_icon = FloatingIcon()
-        self.floating_icon.search_signal.connect(self.search)
+        self.floating_icon.action_signal.connect(self.action_handler)
 
         self.edit_window = EditWindow()
 
@@ -123,25 +123,34 @@ class MainWindow(QMainWindow):
         self.tray_icon = TrayIcon(self.main_icon)
         self.tray_icon.show()
 
+    def action_handler(self, action: str):
+        self.current_token = ''
+
+        if action == 'search':
+            self.search(self.copy_text)
+        elif action == 'translate':
+            self.show_window(1)
+            self.on_translate()
+
     def search(self, text = ''):
         self.current_token = ''
-        _text = text or self.copy_text
-        if _text:
+        if text:
             if config_manager.in_debug():
-                logging.info(f'Search: {_text}')
+                logging.info(f'Search: {text}')
 
             self.show_window()
             self.search_input.clear()
             self.token_list.clear()
 
-            tokens = self.token_list.tokenizer(_text)
+            tokens = self.token_list.tokenizer(text)
             if tokens:
                 self.current_token = tokens[0]
                 self.word_list.search_words(tokens[0:1])
             else:
                 self.word_list.show_words([])
 
-    def show_window(self):
+    def show_window(self, stack_index=0):
+
         if (self.isMinimized() or not self.isVisible()) and self.copy_text:
             ctx.copy_clipboard_disabled = True
 
@@ -152,8 +161,10 @@ class MainWindow(QMainWindow):
             if self.floating_icon.isVisible():
                 self.floating_icon.close()
 
-            self.conetnt_switch_label.setText('翻译')
-            self.stack_widget.setCurrentIndex(0)
+            conetnt_switch_label = '翻译' if stack_index == 0 else '词典'
+            self.conetnt_switch_label.setText(conetnt_switch_label)
+            self.stack_widget.setCurrentIndex(stack_index)
+
             self.showNormal()
 
     def show_floating_icon(self, selectedText):        

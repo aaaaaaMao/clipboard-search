@@ -12,7 +12,7 @@ class TokenList(QListWidget):
         super().__init__()
         self.setMaximumHeight(height)
 
-    def tokenizer(self, text: str):
+    def tokenizer(self, text: str) -> list[str]:
         self.clear()
         dup = set()
 
