@@ -145,7 +145,8 @@ class MainWindow(QMainWindow):
         if (self.isMinimized() or not self.isVisible()) and self.copy_text:
             ctx.copy_clipboard_disabled = True
 
-            self.move(self.position + QPoint(20, -100))
+            self.position = self.position + QPoint(20, -100)
+            self.move(self.position)
 
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
             if self.floating_icon.isVisible():
@@ -195,6 +196,7 @@ class MainWindow(QMainWindow):
         self.old_hook(err_type, err_value, err_traceback)
 
     def show_edit_window(self):
+        self.edit_window.move(self.position + QPoint(self.width(), 0))
         self.edit_window.show_window(self.current_token)
 
     def on_translate(self):
