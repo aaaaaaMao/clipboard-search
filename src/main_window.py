@@ -110,6 +110,7 @@ class MainWindow(QMainWindow):
 
         self.stack_widget = QStackedWidget()
         self.word_list = WordList()
+        self.word_list.create_card_from_dict.connect(self.show_edit_window_from_dict)
         self.translation = Translation()
         self.stack_widget.addWidget(self.word_list)
         self.stack_widget.addWidget(self.translation)
@@ -209,6 +210,10 @@ class MainWindow(QMainWindow):
     def show_edit_window(self):
         self.edit_window.move(self.position + QPoint(self.width(), 0))
         self.edit_window.show_window(self.current_token)
+
+    def show_edit_window_from_dict(self, data: dict):
+        self.edit_window.move(self.position + QPoint(self.width(), 0))
+        self.edit_window.show_window(field_data=data)
 
     def on_translate(self):
         if not self.copy_text:

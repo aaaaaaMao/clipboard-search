@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Dict
 import re
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 
 
 def trim(content: str, remove_new_line=False) -> str:
@@ -110,6 +110,189 @@ def transform_kana(text: str) -> List[str]:
         result.append(''.join(hiragana))
 
     return result
+
+def _has_purple_style(style: str) -> bool:
+    """Check if a style string contains purple color (named or hex)."""
+    normalized = re.sub(r'\s*:\s*', ':', style).lower().strip()
+    return 'color:purple' in normalized or 'color:#800080' in normalized
+
+
+def _is_pitch_char(ch: str) -> bool:
+    """Check if a character is a pitch notation (circled number including ⓪)."""
+    if len(ch) != 1:
+        return False
+    cp = ord(ch)
+    return cp == 0x24EA or (0x2460 <= cp <= 0x2473)
+
+
+def _extract_pitch_from_spans(parent) -> str:
+    """Try to find pitch (circled number) in purple spans, fallback to any circled number."""
+    # First: purple span that looks like pitch (single pitch character)
+    for span in parent.find_all('span'):
+        text = span.get_text().strip()
+        style = span.get('style', '')
+        if _has_purple_style(style) and _is_pitch_char(text):
+            return text
+    # Second: any span that looks like a pitch character
+    for span in parent.find_all('span'):
+        text = span.get_text().strip()
+        if _is_pitch_char(text):
+            return text
+    # Third: any purple span (less reliable)
+    for span in parent.find_all('span'):
+        text = span.get_text().strip()
+        style = span.get('style', '')
+        if _has_purple_style(style) and text:
+            return text
+    return ''
+
+
+def _extract_pos_from_element(parent) -> str:
+    """Try to find PoS (contains ·) in purple spans, fallback to text-based."""
+    # First: purple span with · in text (strongest signal for PoS)
+    for span in parent.find_all('span'):
+        text = span.get_text().strip()
+        style = span.get('style', '')
+        if _has_purple_style(style) and '·' in text:
+            return text
+    # Second: any span with · (PoS marker)
+    for span in parent.find_all('span'):
+        text = span.get_text().strip()
+        if '·' in text:
+            return text
+    # Third: any purple span
+    for span in parent.find_all('span'):
+        text = span.get_text().strip()
+        style = span.get('style', '')
+        if _has_purple_style(style) and text:
+            return text
+    return ''
+
+
+def _find_heading_element(soup) -> dict:
+    """Find the heading element and extract furigana/kanji/pitch."""
+    result = {}
+    # Try known heading tags
+    heading = soup.find('h3') or soup.find('div')
+    if not heading:
+        return result
+
+    # Furigana: prefer direct text node before first span (e.g. <h3>てんせい<span>⓪</span>【転生】</h3>)
+    if heading.contents:
+        first = heading.contents[0]
+        if isinstance(first, NavigableString):
+            text = first.strip()
+            if text:
+                result['furigana'] = text
+    if not result.get('furigana'):
+        spans = heading.find_all('span')
+        if spans:
+            result['furigana'] = spans[0].get_text().strip()
+
+    result['pitch'] = _extract_pitch_from_spans(heading)
+
+    full_text = heading.get_text()
+    match = re.search(r'【(.+?)】', full_text)
+    if match:
+        result['kanji'] = match.group(1).strip()
+    else:
+        # If no 【】, check last span for CJK text
+        spans = heading.find_all('span')
+        if len(spans) > 1:
+            last_text = spans[-1].get_text().strip()
+            if re.search(r'[\u4e00-\u9fff]', last_text):
+                result['kanji'] = last_text
+
+    return result
+
+
+def _find_meaning_element(soup) -> dict:
+    """Find the meaning/definition element and extract PoS and definition."""
+    result = {}
+    # Try known meaning selectors
+    meaning = (
+        soup.find('p', class_='meaning') or
+        soup.find('div', class_='meaning') or
+        soup.find_all('div')[1] if len(soup.find_all('div')) > 1 else None
+    )
+    if not meaning:
+        return result
+
+    result['pos'] = _extract_pos_from_element(meaning)
+
+    full_text = meaning.get_text()
+    if result['pos']:
+        pos_idx = full_text.find(result['pos'])
+        if pos_idx >= 0:
+            result['def_cn'] = full_text[pos_idx + len(result['pos']):].strip()
+    else:
+        result['def_cn'] = re.sub(r'^\d+\s*', '', full_text).strip()
+
+    return result
+
+
+def _find_sentence_element(soup) -> dict:
+    """Find the example sentence element and extract JP and CN parts."""
+    result = {}
+    # Try known sentence selectors
+    ex_elem = (
+        soup.find('div', class_='sec ex') or
+        soup.find('div', class_='example') or
+        soup.find('p', class_='example')
+    )
+    if not ex_elem:
+        return result
+
+    # Check for dedicated sub-elements first (PJE4 format)
+    jpexam = ex_elem.find('jpexam')
+    cnexam = ex_elem.find('cnexam') or ex_elem.find('enexam')
+    if jpexam:
+        result['sent_jp'] = jpexam.get_text().strip()
+    if cnexam:
+        result['sent_cn'] = cnexam.get_text().strip()
+    if result.get('sent_jp') and result.get('sent_cn'):
+        return result
+
+    # Fallback: slash-separated format
+    text = ex_elem.get_text().strip()
+    text = re.sub(r'^▸\s*', '', text)
+    text = re.sub(r'^▷\s*', '', text)
+    if '/' in text:
+        parts = text.split('/', 1)
+        result['sent_jp'] = parts[0].strip()
+        result['sent_cn'] = parts[1].strip()
+
+    return result
+
+
+def parse_mdict_html(content: str) -> Dict[str, str]:
+    soup = BeautifulSoup(content, 'html.parser')
+
+    result = {
+        "VocabFurigana": "",
+        "VocabKanji": "",
+        "VocabPitch": "",
+        "VocabPoS": "",
+        "VocabDefCN": "",
+        "SentKanji1": "",
+        "SentDef1": "",
+    }
+
+    heading = _find_heading_element(soup)
+    result["VocabFurigana"] = heading.get('furigana', '')
+    result["VocabKanji"] = heading.get('kanji', '')
+    result["VocabPitch"] = heading.get('pitch', '')
+
+    meaning = _find_meaning_element(soup)
+    result["VocabPoS"] = meaning.get('pos', '')
+    result["VocabDefCN"] = meaning.get('def_cn', '').rstrip('。')
+
+    sentence = _find_sentence_element(soup)
+    result["SentKanji1"] = sentence.get('sent_jp', '')
+    result["SentDef1"] = sentence.get('sent_cn', '').rstrip('。')
+
+    return result
+
 
 invalid_tokens = [
     ' ', '　', '、', '。', '、', '・', '「', '」', '（', '）',

@@ -12,6 +12,7 @@ from .word_item import WordListItem
 class WordList(QListWidget):
 
     _search_succeed_signal = pyqtSignal(list)
+    create_card_from_dict = pyqtSignal(dict)
 
     def __init__(self):
         super().__init__()
@@ -48,6 +49,9 @@ class WordList(QListWidget):
     def add_word(self, word):
         item = QListWidgetItem(self)
         wordItem = WordListItem(word)
+
+        if word.source == 'mdict':
+            wordItem.create_card_requested.connect(self.create_card_from_dict.emit)
 
         size = wordItem.sizeHint()
         # size.setHeight(math.ceil(size.height()*1.25))

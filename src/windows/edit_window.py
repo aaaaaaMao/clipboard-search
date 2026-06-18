@@ -41,6 +41,7 @@ class EditWindow(QDialog):
             "例句假名": "SentFurigana1",
             "例句释义": "SentDef1",
         }
+        self._field_labels = {v: k for k, v in self.fields.items()}
 
         for field in self.fields:
             line_edit = QLineEdit()
@@ -59,7 +60,7 @@ class EditWindow(QDialog):
 
         self.setLayout(self.main_layout)
 
-    def show_window(self, word=''):
+    def show_window(self, word='', field_data: dict = None):
         self.save_btn.setDisabled(True)
         self.selected_audio_source = None
         self.audio_sources = []
@@ -69,7 +70,13 @@ class EditWindow(QDialog):
         for field in self.fields:
             self.input[field].clear()
 
-        self.input['汉字'].setText(word)        
+        if field_data:
+            for anki_field, value in field_data.items():
+                label = self._field_labels.get(anki_field)
+                if label:
+                    self.input[label].setText(value)
+        else:
+            self.input['汉字'].setText(word)
 
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
 

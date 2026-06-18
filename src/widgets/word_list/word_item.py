@@ -7,18 +7,23 @@ from PyQt5.QtWidgets import (
     QTextEdit,
     QSizePolicy,
     QLabel,
+    QMenu,
+    QAction,
+    QApplication,
 )
-from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtCore import Qt, QUrl, pyqtSignal
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtGui import QPixmap
 
 from src import anki_client, config_manager
+from src.utils.utils import parse_mdict_html
 from .search_service import SearchResult
 
 
 class WordListItem(QWidget):
 
     anki_tag = 'clipboard-search'
+    create_card_requested = pyqtSignal(dict)
 
     def __init__(self, item: SearchResult):
         super().__init__()
@@ -73,6 +78,11 @@ class WordListItem(QWidget):
             QtWidgets.QLayout.SizeConstraint.SetDefaultConstraint
         )
 
+        if item.source == 'mdict':
+            self.html_content.setContextMenuPolicy(Qt.NoContextMenu)
+            self.setContextMenuPolicy(Qt.CustomContextMenu)
+            self.customContextMenuRequested.connect(self.on_context_menu)
+
     def on_box_checked(self, state, item: SearchResult):
         if item.source != 'anki':
             return
@@ -95,3 +105,24 @@ class WordListItem(QWidget):
         player = QMediaPlayer()
         player.setMedia(QMediaContent(QUrl.fromLocalFile(audio_file_path)))
         player.play()
+
+    def on_context_menu(self, pos):
+        menu = QMenu(self)
+
+        create_action = QAction('创建卡片', self)
+        create_action.triggered.connect(self.on_create_card)
+        menu.addAction(create_action)
+
+        copy_action = QAction('复制文本', self)
+        copy_action.triggered.connect(self.on_copy_text)
+        menu.addAction(copy_action)
+
+        menu.exec_(self.mapToGlobal(pos))
+
+    def on_create_card(self):
+        data = parse_mdict_html(self._item.html_content)
+        self.create_card_requested.emit(data)
+
+    def on_copy_text(self):
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self._item.html_content)
