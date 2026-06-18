@@ -10,9 +10,8 @@ python main.py                  # run the app
 ## Dev commands
 
 ```bash
-pytest tests/                   # run all tests
-pytest tests/test_anki_connect_client.py -v  # verbose, single file
-pytest tests/test_anki_connect_client.py::test_search_jp_words  # single test
+pytest tests/                   # run all tests (skips Anki integration by default)
+pytest tests/ -m anki_integration  # run Anki-integration tests only (needs Anki running)
 
 ./build.ps1                     # PyInstaller single-file .exe build
 ```
@@ -59,6 +58,8 @@ from src import config_manager, ctx, anki_client
 ## Test prerequisites
 
 Tests in `tests/test_anki_connect_client.py` are **integration tests** that call the real AnkiConnect HTTP API. Anki must be running locally with the AnkiConnect add-on listening on `localhost:8765`.
+
+These tests are marked `anki_integration` and are **skipped by default** (`pytest.ini`). Run them explicitly with `pytest tests/ -m anki_integration`.
 
 ## External data
 

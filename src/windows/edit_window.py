@@ -9,10 +9,23 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QFormLayout,
 )
-from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtCore import Qt, QUrl, QThread, pyqtSignal
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 
 from src import anki_client
+
+
+class AudioFetchThread(QThread):
+    result = pyqtSignal(list)
+
+    def __init__(self, term, reading):
+        super().__init__()
+        self._term = term
+        self._reading = reading
+
+    def run(self):
+        sources = anki_client.list_audio_sources(self._term, self._reading)
+        self.result.emit(sources)
 
 
 class EditWindow(QDialog):
@@ -83,9 +96,7 @@ class EditWindow(QDialog):
         self.show()
 
         if self.input['汉字'].text() and self.input['中文释义'].text():
-            self.on_audio_label_click()
-            if self.audio_sources:
-                self.on_play_audio(self.audio_sources[0])
+            self._start_audio_fetch(auto_play=True)
 
     def save_word(self):
         deck_name = "额外"
@@ -126,20 +137,30 @@ class EditWindow(QDialog):
                     widget.deleteLater()
 
     def on_audio_label_click(self):
+        self._start_audio_fetch(auto_play=False)
+
+    def _start_audio_fetch(self, auto_play):
         term = self.input['汉字'].text()
         reading = self.input['假名'].text() or term
 
         self.clear_audio_layout()
 
-        self.audio_sources = anki_client.list_audio_sources(term, reading)
-        self.save_btn.setDisabled(False)
-        
-        for source in self.audio_sources:
-   
-            audio_label = QLabel(source['name'])
-            audio_label.mousePressEvent = lambda _, source=source: self.on_play_audio(source)
+        self._audio_thread = AudioFetchThread(term, reading)
+        self._audio_thread.result.connect(lambda sources, ap=auto_play: self._on_audio_ready(sources, ap))
+        self._audio_thread.finished.connect(self._audio_thread.deleteLater)
+        self._audio_thread.start()
 
+    def _on_audio_ready(self, sources, auto_play):
+        self.audio_sources = sources
+        self.save_btn.setDisabled(False)
+
+        for source in sources:
+            audio_label = QLabel(source['name'])
+            audio_label.mousePressEvent = lambda _, s=source: self.on_play_audio(s)
             self.audio_layout.addWidget(audio_label)
+
+        if auto_play and sources:
+            self.on_play_audio(sources[0])
 
 
     def on_play_audio(self, source):

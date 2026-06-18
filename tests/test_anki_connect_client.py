@@ -14,6 +14,7 @@ def client():
 
 # --- 测试用例（连接 anki 进行测试） ---
 
+@pytest.mark.anki_integration
 def test_successful_response_deck_names(client):
     """
     测试获取所有牌组名称的成功响应。
@@ -23,6 +24,7 @@ def test_successful_response_deck_names(client):
     assert isinstance(result_data, dict)
     assert "Default" in result_data['result'] # 假定 "Default" 牌组总是存在
 
+@pytest.mark.anki_integration
 def test_search_jp_words(client):
     word = 'あっさり'
     result = client.search_jp_words(word)
@@ -44,6 +46,7 @@ def test_search_jp_words(client):
     audio_file_path = client.get_audio_file_path(result[0].audio)
     assert audio_file_path.endswith('collection.media\\あっさり_アッサ＼リ_3_NHK-2016-local.mp3')
 
+@pytest.mark.anki_integration
 def test_add_tags(client):
     query = f'deck:"API 测试" and vocabkanji:"漢字"'
 
@@ -74,6 +77,7 @@ def test_add_tags(client):
     assert 'test-tag-2' not in tags
     assert len(tags) == 3
 
+@pytest.mark.anki_integration
 def test_add_note(client):
     deck_name = "API 测试"
     model_name = "JLPT-NEW"

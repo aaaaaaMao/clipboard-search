@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
     QSystemTrayIcon,
     QLineEdit,
     QStackedWidget,
+    QApplication,
 )
 from PyQt5.QtCore import QSize, Qt, QObject, QThread, QEvent, QPoint
 from PyQt5.QtGui import QIcon, QCursor
@@ -207,12 +208,24 @@ class MainWindow(QMainWindow):
         logging.error("".join(traceback_format))
         self.old_hook(err_type, err_value, err_traceback)
 
+    def _position_edit_window(self):
+        screen_right = QApplication.desktop().availableGeometry().right()
+        win_right = self.position.x() + self.width()
+        edit_w = self.edit_window.width()
+
+        if win_right + edit_w <= screen_right:
+            x = win_right
+        else:
+            x = self.position.x() - edit_w
+
+        self.edit_window.move(x, self.position.y())
+
     def show_edit_window(self):
-        self.edit_window.move(self.position + QPoint(self.width(), 0))
+        self._position_edit_window()
         self.edit_window.show_window(self.current_token)
 
     def show_edit_window_from_dict(self, data: dict):
-        self.edit_window.move(self.position + QPoint(self.width(), 0))
+        self._position_edit_window()
         self.edit_window.show_window(field_data=data)
 
     def on_translate(self):
