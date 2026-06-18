@@ -82,6 +82,11 @@ class EditWindow(QDialog):
 
         self.show()
 
+        if self.input['汉字'].text() and self.input['中文释义'].text():
+            self.on_audio_label_click()
+            if self.audio_sources:
+                self.on_play_audio(self.audio_sources[0])
+
     def save_word(self):
         deck_name = "额外"
         model_name = "JLPT-NEW"

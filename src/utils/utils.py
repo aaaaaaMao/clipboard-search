@@ -285,11 +285,15 @@ def parse_mdict_html(content: str) -> Dict[str, str]:
 
     meaning = _find_meaning_element(soup)
     result["VocabPoS"] = meaning.get('pos', '')
-    result["VocabDefCN"] = meaning.get('def_cn', '').rstrip('。')
+    def_cn = meaning.get('def_cn', '').rstrip('。')
+    result["VocabDefCN"] = def_cn.replace('。', '；')
 
     sentence = _find_sentence_element(soup)
-    result["SentKanji1"] = sentence.get('sent_jp', '')
-    result["SentDef1"] = sentence.get('sent_cn', '').rstrip('。')
+    sent_jp = sentence.get('sent_jp', '')
+    if result["VocabKanji"]:
+        sent_jp = sent_jp.replace('～', result["VocabKanji"])
+    result["SentKanji1"] = sent_jp
+    result["SentDef1"] = sentence.get('sent_cn', '')
 
     return result
 
